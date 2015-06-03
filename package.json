@@ -1,0 +1,32 @@
+{
+  "name": "destinyPlumbing",
+  "version": "1.0.0",
+  "description": "AWS Lambda function & pipeline to dump Destiny data to S3 as JSON",
+  "repository": "http://github.com/joshhunt/destinyPlumbing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "notes": {
+    "node-sqlite3": "native bindings can be found https://mapbox-node-binary.s3.amazonaws.com/sqlite3/v3.0.8/node-v11-linux-x64.tar.gz"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1.30",
+    "bluebird": "^2.9.25",
+    "coffee-script": "^1.9.2",
+    "lodash": "^3.9.3",
+    "request-promise": "^0.4.2",
+    "rimraf": "^2.3.4",
+    "sqlite3": "^3.0.8",
+    "underscore": "^1.8.3",
+    "unzip": "^0.1.11"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-awslambda": "^0.2.2",
+    "gulp-install": "^0.4.0",
+    "gulp-zip": "^3.0.2"
+  }
+}
