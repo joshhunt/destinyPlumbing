@@ -13,7 +13,7 @@ module.exports = (taskName, taskData) ->
         'mobileWorldContent'
     ]
 
-    if name  not in whitelistedDatabases
+    if name not in whitelistedDatabases
         return Promise.reject 'Attempted to process non-whitelisted database'
 
     dbHandler = require "../resources/dbHandlers/#{name}"
