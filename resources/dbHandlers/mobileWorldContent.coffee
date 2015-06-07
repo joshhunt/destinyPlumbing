@@ -58,6 +58,7 @@ processTable = ({db, tableName, idField, variation}) ->
             utils.uploadStringToS3 {
                 key: "raw/mobileWorldContent/#{variation}/#{tableName}.json"
                 data: JSON.stringify(data)
+                gzip: true
             }
 
 

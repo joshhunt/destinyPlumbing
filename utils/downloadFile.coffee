@@ -1,20 +1,34 @@
 fs = require 'fs'
 http = require 'http'
 path = require 'path'
+_ = require 'lodash'
 
 Promise = require 'bluebird'
 rimraf = require 'rimraf'
 
-module.exports = (url, filename) -> new Promise (resolve, reject) ->
-    filename ?= path.basename url
+module.exports = (url, filename, returnCached) ->
+    args = arguments
+    new Promise (resolve, reject) ->
+        if _.isObject args[0]
+            {url, filename, returnCached} = args[0]
 
-    destPath = '/tmp/' + filename
-    rimraf destPath, ->
-        destStream = fs.createWriteStream destPath
+        filename ?= path.basename url
+        returnCached ?= true
 
-        http.get url, (resp) ->
-            resp.pipe destStream
+        destPath = '/tmp/' + filename
 
-            resp.on 'end', ->
-                destStream.close()
-                resolve destPath
+        fs.stat destPath, (err, stat) ->
+            if err?.code isnt 'ENOENT' and returnCached
+                console.log 'Returning cached version of', destPath, 'early'
+                return resolve destPath
+
+            rimraf destPath, ->
+                console.log 'Downloading', destPath
+                destStream = fs.createWriteStream destPath
+
+                http.get url, (resp) ->
+                    resp.pipe destStream
+
+                    resp.on 'end', ->
+                        destStream.close()
+                        resolve destPath

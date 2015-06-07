@@ -1,4 +1,4 @@
-fs      = require 'fs'
+efs      = require 'fs'
 gulp    = require 'gulp'
 zip     = require 'gulp-zip'
 lambda  = require 'gulp-awslambda'
@@ -13,23 +13,39 @@ awsLambda  = new AWS.Lambda lambdaOptions
 
 ARCHIVE_FILES = [
     './node_modules/**/*'
+    '!./node_modules/gulp*/**/*'
+    '!./node_modules/**/*.jshintrc'
+    '!./node_modules/**/*.html'
+    '!./node_modules/**/*.md'
+    '!./node_modules/**/*.markdown'
+    '!./node_modules/**/*.npmignore'
+    '!./node_modules/**/readme'
+    '!./node_modules/**/node-v14-darwin-x64/**/*'
+    './node_modules/sqlite3/node_modules/node-pre-gyp/**/*'
+
     './tasks/**/*'
+    './resources/**/*'
     './utils/**/*'
     './index.js'
     './start.coffee'
     './config.coffee'
 ]
+SNS_PUBLISH_ALREADY_RAN = false
 
-gulp.task 'install', ->
-    gulp.src 'package.json'
-        .pipe install()
+_runViaSns = (done) ->
+    if SNS_PUBLISH_ALREADY_RAN
+        return
 
-gulp.task 'runViaSns', (done) ->
+    SNS_PUBLISH_ALREADY_RAN = true
     task = 'downloadManifestAndDispatch'
     data = {}
     utils.snsPublish {task, data}
         .then        -> done()
         .catch (err) -> done(err)
+
+gulp.task 'runViaSns', (done) ->
+    _runViaSns done
+    return
 
 gulp.task 'run', (done) ->
     params = {
@@ -56,7 +72,7 @@ gulp.task 'run', (done) ->
         if LogResult
             logs = new Buffer(LogResult, 'base64').toString('ascii')
             console.log logs
-            fs.writeFileSync './temp/lastLogs.txt', logs
+            fs.writeFileSync './working/lastLogs.txt', logs
 
         if Payload
             console.log Payload
@@ -65,15 +81,15 @@ gulp.task 'run', (done) ->
 
     return
 
-gulp.task 'archive', ['install'], ->
+gulp.task 'archive', ->
     gulp.src ARCHIVE_FILES, {base: './'}
         .pipe zip('archive.zip')
-        .pipe gulp.dest './temp'
+        .pipe gulp.dest './working'
 
-gulp.task 'upload', ['install'], ->
+gulp.task 'upload', ->
     gulp.src ARCHIVE_FILES, {base: './'}
         .pipe zip('archive.zip')
-        .pipe gulp.dest './temp'
+        .pipe gulp.dest './working'
         .pipe lambda(lambdaFunctionName, lambdaOptions)
 
 gulp.task 'test', ['upload'], ->

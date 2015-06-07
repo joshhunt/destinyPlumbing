@@ -1,5 +1,6 @@
 fs = require 'fs'
 _ = require 'lodash'
+utils = require '../utils'
 Promise = require 'bluebird'
 defs = require '../resources/definitions'
 
@@ -11,25 +12,37 @@ writeJson = (filename, data, msg) ->
         console.log(msg) if msg
 
 
-
-defs.classType =
-    0: 'Titan'
-    1: 'Hunter'
-    2: 'Warlock'
-    3: 'Unknown'
-
-
 module.exports = (taskName, taskData) -> new Promise (resolve, reject) ->
     console.log 'Processing items'
 
-    itemDefinition = require '../temp/DestinyInventoryItemDefinition.json'
-    bucketDefinition = require '../temp/DestinyInventoryBucketDefinition.json'
-    talentGridDefinition = require '../temp/DestinyTalentGridDefinition.json'
-    processItems itemDefinition, {bucketDefinition, talentGridDefinition}
+    requiredFiles = _.pick taskData.tables, ['DestinyInventoryItemDefinition', 'DestinyInventoryBucketDefinition', 'DestinyTalentGridDefinition']
 
-processItems = (itemDefinition, extraData = {}) ->
+    console.log 'Downloading required files:'
+    console.log requiredFiles
+
+    utils.downloadS3Object requiredFiles
+        .then readBuffersToJson
+        .then (tables) -> {tables, taskData}
+        .then processItems
+
+readBuffersToJson = (buffersObj) ->
+    stringObj = {}
+    for key, buf of buffersObj
+        stringObj[key] = JSON.parse(buf.toString())
+    return stringObj
+
+processItems = ({tables, taskData}) ->
+    console.log '\n\ncool, finally processing items.'
+
+    variation = taskData.db.variation
+    itemDefinition = tables.DestinyInventoryItemDefinition
+    extraData =
+        bucketDefinition: tables.DestinyInventoryBucketDefinition
+        talentGridDefinition: tables.DestinyTalentGridDefinition
+
     itemsByType = {}
     allItems = {}
+    uploadPromises = []
 
     for itemHash, item of itemDefinition
         itemType = defs.itemType[item.itemType]
@@ -48,10 +61,19 @@ processItems = (itemDefinition, extraData = {}) ->
             allItemsForType[item.hash] = item
             allItems[item.hash] = item
 
-        writeJson "./temp/processed/#{itemType}.json", allItemsForType, "Saved #{itemType}"
+        uploadPromises.push utils.uploadStringToS3 {
+            key: "items/#{variation}/#{itemType}.json"
+            data: {items: allItemsForType}
+            gzip: true
+        }
 
-    writeJson "./temp/processed/_AllItems.json", allItems, "Saved #{itemType}"
+    uploadPromises.push utils.uploadStringToS3 {
+        key: "items/#{variation}.json"
+        data: {items: allItems}
+        gzip: true
+    }
 
+    Promise.all uploadPromises
 
 getWeaponDamageTypes = (talentGrid) ->
     possible = []

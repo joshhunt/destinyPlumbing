@@ -17,7 +17,7 @@ module.exports = (taskName, taskData) ->
             console.log 'All dispatched.'
             return "Dispatched #{results.length} events"
 
-dispatchAllTasks = (manifest) ->
+createAllTasks = (manifest) ->
     console.log 'Manifest recieved, dispatching tasks via SNS'
     manifest = manifest.Response
     tasks = []
@@ -36,10 +36,10 @@ dispatchAllTasks = (manifest) ->
         url = BUNGIE + path
         tasks.push createTask {name, variation, url}
 
-    promises
+    return tasks
 
 createTask = (data) ->
-    console.log 'Publishing task ' + task + ' SNS:'
+    console.log 'Adding task to queue ' + PROCESS_DATABASE_TASK_NAME
     console.log data
     return {data, task: PROCESS_DATABASE_TASK_NAME}
 

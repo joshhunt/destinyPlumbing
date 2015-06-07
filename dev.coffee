@@ -2,7 +2,7 @@ start = require './start'
 
 stubbedContext =
     succeed: (res) ->
-        console.log '\n', res
+        console.log '\nTask completed.\n', res
         process.exit()
 
     fail: (err) ->
@@ -27,9 +27,15 @@ stubbedContext =
 #     variation: 'ja'
 #     url: 'http://www.bungie.net/common/destiny_content/sqlite/ja/world_sql_content_884749c1a137aa80b701fb175eb9620d.content'
 
-stubbedPayload =
-    task: 'processItems'
-    data: {}
+# stubbedPayload =
+#     task: 'processItems'
+#     data: {}
+
+# stubbedPayload = require './working/processDbAllCompleted.json'
+# stubbedPayload = require './working/completedProcessDatabase.json'
+stubbedPayload = require './working/processItemsTask.json'
+
+
 
 stubbedEvent =
     Records: [

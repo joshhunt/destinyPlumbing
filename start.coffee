@@ -11,7 +11,7 @@ exports.handler = (event, context) ->
     task = require("./tasks/#{taskName}")
     task taskName, payload.data
         .then (result) ->
-            console.log 'Task finished.'
+            console.log 'Task finished with result:'
             context.succeed result
         .catch (err) ->
             console.log 'Task failed with error:'
