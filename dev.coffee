@@ -9,9 +9,9 @@ stubbedContext =
         console.log '\nCalled context.fail()'
         console.log (err.stack or err)
 
-# stubbedPayload =
-#     task: 'downloadManifestAndDispatch'
-#     data: {}
+stubbedPayload =
+    task: 'downloadManifestAndDispatch'
+    data: {}
 
 # stubbedPayload =
 #   task: 'processDatabase'
@@ -33,9 +33,9 @@ stubbedContext =
 
 # stubbedPayload = require './working/processDbAllCompleted.json'
 # stubbedPayload = require './working/completedProcessDatabase.json'
-stubbedPayload = require './working/processItemsTask.json'
-
-
+# stubbedPayload = require './working/processItemsTask.json'
+# stubbedPayload = require './working/lastSnsDryRun.json'
+# stubbedPayload = require './working/makeIndexTask.json'
 
 stubbedEvent =
     Records: [
