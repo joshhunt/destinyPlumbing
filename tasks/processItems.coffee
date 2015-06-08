@@ -6,12 +6,6 @@ defs = require '../resources/definitions'
 
 BUNGIE_URL = 'http://bungie.net'
 
-writeJson = (filename, data, msg) ->
-    fs.writeFile filename, JSON.stringify(data, null, 2), (err) ->
-        throw(err) if err
-        console.log(msg) if msg
-
-
 module.exports = (taskName, taskData) -> new Promise (resolve, reject) ->
     console.log 'Processing items'
 
