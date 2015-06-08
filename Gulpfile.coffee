@@ -86,7 +86,11 @@ gulp.task 'archive', ->
         .pipe zip('archive.zip')
         .pipe gulp.dest './working'
 
-gulp.task 'upload', ->
+gulp.task 'copyBindings', ->
+    gulp.src './files/sqliteBindings/**/*'
+        .pipe gulp.dest './node_modules/sqlite3/lib/binding'
+
+gulp.task 'upload', ['copyBindings'], ->
     gulp.src ARCHIVE_FILES, {base: './'}
         .pipe zip('archive.zip')
         .pipe gulp.dest './working'
