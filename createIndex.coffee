@@ -42,7 +42,7 @@ RAW_PATH_REGEX = /^raw\//
 
 listAllKeys undefined, (keys) ->
     justPaths = []
-    manifest = {}
+    resources = {}
 
     _.each keys, (s3Obj) ->
         s3Key = s3Obj.Key
@@ -52,7 +52,7 @@ listAllKeys undefined, (keys) ->
         if match
             [path, cat, variation, name] = match
             url = "http://destiny.plumbing/" + path
-            setItemNested manifest, [cat, variation, name], url
+            setItemNested resources, [cat, variation, name], url
             return
 
         match = s3Key.match ITEM_INDEX_REGEX
@@ -60,24 +60,32 @@ listAllKeys undefined, (keys) ->
             [path, cat, variation] = match
             url = "http://destiny.plumbing/" + path
             name = 'all'
-            setItemNested manifest, [cat, variation, name], url
+            setItemNested resources, [cat, variation, name], url
             return
 
         if s3Key.match RAW_PATH_REGEX
             parsedPath = pathLib.parse s3Key
             pathArr = parsedPath.dir.split '/'
             pathArr.push parsedPath.name
-            setItemNested manifest, pathArr, "http://destiny.plumbing/" + s3Key
+            setItemNested resources, pathArr, "http://destiny.plumbing/" + s3Key
             console.log parsedPath
 
 
     writeJson './working/allfiles.json', keys
     writeJson './working/allfilesJustPaths.json', justPaths
-    writeJson './working/index.json', manifest
-    # console.log manifest
+    writeJson './working/index.json', resources
+    # console.log resources
 
-    utils.uploadStringToS3 {
-        key: 'index.json'
-        data: JSON.stringify(manifest, null, 2)
-        gzip: true
-    }
+    newIndex = {resources}
+
+    uploadPromise = utils.downloadS3Object 'index.json'
+        .then (prevIndex) ->
+            prevIndex = JSON.parse prevIndex
+            newIndex.bungieManifestVersion = prevIndex.bungieManifestVersion
+            newIndex.resources.bungieManifest = prevIndex.resources.bungieManifest
+
+            utils.uploadStringToS3 {
+                key: 'index.json'
+                data: JSON.stringify(newIndex, null, 2)
+                gzip: true
+            }
