@@ -53,8 +53,6 @@ downloadSingle = (key, keyName) -> new Promise (resolve, reject) ->
 
         if resp.ContentEncoding.toLowerCase() is 'gzip'
             zlib.unzip resp.Body, (err, result) ->
-                console.log 'err:', err
-                console.log 'result:', result
                 _returnData result
             return
 
