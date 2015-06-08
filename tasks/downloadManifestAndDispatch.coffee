@@ -22,19 +22,23 @@ createAllTasks = (manifest) ->
     manifest = manifest.Response
     tasks = []
 
-    tasks.push createTask {name: 'mobileAssetContent', url: BUNGIE + manifest.mobileAssetContentPath}
+    tasks.push createTask {
+        name: 'mobileAssetContent',
+        url: BUNGIE + manifest.mobileAssetContentPath,
+        bungieManifest: manifest
+    }
 
     for {version, path} in manifest.mobileGearAssetDataBases
         name = 'mobileGearAssetDatabases'
         variation = 'v' + version
         url = BUNGIE + path
-        tasks.push createTask {name, variation, url}
+        tasks.push createTask {name, variation, url, bungieManifest: manifest}
 
     for lang, path of manifest.mobileWorldContentPaths
         name = 'mobileWorldContent'
         variation = lang
         url = BUNGIE + path
-        tasks.push createTask {name, variation, url}
+        tasks.push createTask {name, variation, url, bungieManifest: manifest}
 
     return tasks
 

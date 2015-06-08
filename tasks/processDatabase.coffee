@@ -6,7 +6,8 @@ module.exports = (taskName, taskData) ->
 
     if taskData.pendingTasks.length is 0
         console.log 'Tasks are empty.'
-        return dispatchItemProcessing taskData.completedResults
+        bungieManifest = taskData.completedTasks[0].bungieManifest
+        return dispatchItemProcessing taskData.completedResults, bungieManifest
 
     [task, pendingTasks...] = taskData.pendingTasks
     {name, url, variation} = task.data
@@ -58,12 +59,17 @@ module.exports = (taskName, taskData) ->
         .then dispatchNextTask
 
 
-dispatchItemProcessing = (completedTasks) ->
+dispatchItemProcessing = (completedTasks, bungieManifest) ->
     promises = []
 
     for completedTask in completedTasks
         createTaskFunc = itemProcessingTasks[completedTask.data.name]
         promises.push createTaskFunc completedTask
+
+    promises.push utils.snsPublish {
+        task: 'updateIndex'
+        data: {bungieManifest}
+    }
 
     Promise.all promises
 
