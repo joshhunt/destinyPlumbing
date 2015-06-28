@@ -78,17 +78,17 @@ createAllTasks = (manifest) ->
         url = BUNGIE + path
         tasks.push {name, variation, url}
 
-    # for lang, path of manifest.mobileWorldContentPaths
-    #     name = 'mobileWorldContent'
-    #     variation = lang
-    #     url = BUNGIE + path
-    #     tasks.push {name, variation, url}
+    for lang, path of manifest.mobileWorldContentPaths
+        name = 'mobileWorldContent'
+        variation = lang
+        url = BUNGIE + path
+        tasks.push {name, variation, url}
 
-    tasks.push {
-        name: 'mobileWorldContent'
-        variation: 'en'
-        url: BUNGIE + manifest.mobileWorldContentPaths.en
-    }
+    # tasks.push {
+    #     name: 'mobileWorldContent'
+    #     variation: 'en'
+    #     url: BUNGIE + manifest.mobileWorldContentPaths.en
+    # }
 
     return tasks
 
