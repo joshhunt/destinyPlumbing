@@ -20,7 +20,8 @@ mkdirp workingDirectory, ->
         .then checkVersion
         .then createAllTasks
         .then executeTasks
-        .then whenAllTasksAreDone
+        .then () ->
+            console.log 'Everything done!'
         .catch (err) ->
             console.log err
 
@@ -77,23 +78,23 @@ createAllTasks = (manifest) ->
         url = BUNGIE + path
         tasks.push {name, variation, url}
 
-    # for lang, path of manifest.mobileWorldContentPaths
-    #     name = 'mobileWorldContent'
-    #     variation = lang
-    #     url = BUNGIE + path
-    #     tasks.push {name, variation, url}
+    for lang, path of manifest.mobileWorldContentPaths
+        name = 'mobileWorldContent'
+        variation = lang
+        url = BUNGIE + path
+        tasks.push {name, variation, url}
 
-    tasks.push {
-        name: 'mobileWorldContent'
-        variation: 'en'
-        url: BUNGIE + manifest.mobileWorldContentPaths.en
-    }
+    # tasks.push {
+    #     name: 'mobileWorldContent'
+    #     variation: 'en'
+    #     url: BUNGIE + manifest.mobileWorldContentPaths.en
+    # }
 
-    tasks.push {
-        name: 'mobileWorldContent'
-        variation: 'fr'
-        url: BUNGIE + manifest.mobileWorldContentPaths.fr
-    }
+    # tasks.push {
+    #     name: 'mobileWorldContent'
+    #     variation: 'fr'
+    #     url: BUNGIE + manifest.mobileWorldContentPaths.fr
+    # }
 
     return tasks
 
