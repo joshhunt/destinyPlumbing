@@ -98,20 +98,29 @@ createAllTasks = (manifest) ->
     return tasks
 
 
-executeTasks = (tasks) ->
+executeTasks = (tasks) -> new Promise (resolve, reject) ->
     tracker = {}
-    counter = 0
-    promises = []
 
-    promises = tasks.map (task) -> new Promise (resolve, reject) ->
+    _checkCompleteness = ->
+        numberComplete = 0
+
+        for task, state of tracker
+            task = task.split ','
+
+            if state is 'running'
+                console.log " * #{state}: #{task[1]} - #{task[2]}"
+            else
+                numberComplete += 1
+
+        if numberComplete is tracker.length
+            console.log '\n\n\n###\n###\n## all complete:' + allComplete + '\n###\n###\n\n\n'
+            resolve()
+
+    tasks.map (task) ->
         command = './node_modules/.bin/coffee'
         args = ['runDatabase.coffee', task.name, task.variation, task.url]
         tracker[args] = 'running'
         subProcess = spawn command, args
-
-        counter += 1
-
-
 
         subProcess.stdout.on 'data', (data) ->
             console.log data.toString().replace /$\n/, ''
@@ -121,24 +130,9 @@ executeTasks = (tasks) ->
 
         subProcess.on 'close', (code) ->
             console.log 'Process ended with code', code
-            counter -= 1
 
             tracker[args] = 'finished'
-            resolve code
-
-            console.log 'Counter is now', counter
-
-            if counter < 1
-                console.log 'Counter has reset to zero'
-
-
-    setInterval (->
-        for task, state of tracker
-            task = task.split ','
-            console.log "### #{state}: #{task[1]} - #{task[2]}"
-    ), 5000
-
-    Promise.settle promises
+            _checkCompleteness()
 
 
 whenAllTasksAreDone = (results) ->
