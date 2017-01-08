@@ -4,7 +4,6 @@ const path = require('path');
 
 const _ = require('lodash');
 const mkdirp = require('mkdirp');
-const mkdirpPromised = require('mkdirp-promise/lib/node6')
 const unzip = require('unzip');
 const AWS = require('aws-sdk');
 
@@ -15,17 +14,7 @@ mkdirp(DIR_PREFIX);
 
 const IFFT_URL = process.env.IFFT_URL;
 
-const s3 = new AWS.S3({region: process.env.AWS_REGION});
-
-function log(...args) {
-  if (!LOGGING_ENABLED) return;
-  console.log(...args);
-}
-
-function ensureDir(dest) {
-  const fileDir = path.parse(dest).dir;
-  return mkdirpPromised(fileDir);
-}
+const s3 = new AWS.S3({ region: process.env.AWS_REGION });
 
 function resolveCb(resolve, reject) {
   return (err, result) => {
@@ -35,7 +24,23 @@ function resolveCb(resolve, reject) {
     } else {
       resolve(result);
     }
-  }
+  };
+}
+
+function mkdirpPromised(dir) {
+  return new Promise((resolve, reject) => {
+    mkdirp(dir, resolveCb(resolve, reject));
+  });
+}
+
+function log(...args) {
+  if (!LOGGING_ENABLED) return;
+  console.log(...args);
+}
+
+function ensureDir(dest) {
+  const fileDir = path.parse(dest).dir;
+  return mkdirpPromised(fileDir);
 }
 
 module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
