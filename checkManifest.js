@@ -13,6 +13,8 @@ const LAST_RUN_FILE = './lastrun.txt';
 const lastRun = fs.readFileSync(LAST_RUN_FILE).toString();
 console.log('Prev ID:', lastRun);
 
+let didRun = false;
+
 axios.get(MANIFEST_URL, {
   headers: { 'X-API-Key': API_KEY },
 }).then((resp) => {
@@ -21,6 +23,7 @@ axios.get(MANIFEST_URL, {
 
   if (id !== lastRun) {
     notify('destiny.plumbing is updating in response to a change in the manifest.');
+    didRun = true;
     fs.writeFileSync(LAST_RUN_FILE, id);
     return downloadAndProcess();
   }
@@ -28,7 +31,9 @@ axios.get(MANIFEST_URL, {
   return Promise.resolve();
 })
 .then(() => {
-  notify('destiny.plumbing finished');
+  if (didRun) {
+    notify('destiny.plumbing finished');
+  }
 })
 .catch((err) => {
   console.log('err');
