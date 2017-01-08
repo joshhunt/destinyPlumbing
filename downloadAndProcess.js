@@ -48,7 +48,7 @@ module.exports = () => {
     });
   })
   .then((results) => {
-    return mapLimit(results, 2, ([sqlFile, lang], cb) => {
+    return mapLimit(results, 1, ([sqlFile, lang], cb) => {
       console.log('Dumping', lang);
 
       return processDatabase(sqlFile, lang)
