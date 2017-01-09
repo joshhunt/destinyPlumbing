@@ -10,14 +10,12 @@ function saveFileWorker(task, cb) {
 
   const filePath = pathLib.join(...['data'].concat(path));
   const s3Key = path.join('/');
-
   const fileBody = JSON.stringify(obj);
 
   manifestStore.push({ path, filePath, s3Key, obj });
 
   const id = path.join('.');
   console.log(id, 'uploading to', s3Key);
-  console.log('  saving to', filePath);
 
   const promises = [
     uploadToS3(s3Key, fileBody, { ContentType: 'application/json' }),
@@ -33,11 +31,7 @@ function saveFileWorker(task, cb) {
   .catch(cb);
 }
 
-const fileUploadQueue = async.queue(saveFileWorker, 4);
-
-fileUploadQueue.drain = () => {
-  console.log('fileManager queue is empty');
-};
+const fileUploadQueue = async.queue(saveFileWorker, 2);
 
 module.exports.saveFile = function saveFileQueuer(path, obj) {
   return new Promise((resolve, reject) => {
