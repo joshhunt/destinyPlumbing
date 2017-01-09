@@ -144,7 +144,7 @@ module.exports.unzipFile = function cacheableUnzipFile(dest, orig) {
 };
 
 module.exports.alsoResolveWith = function alsoResolveWith(promise, ...extraArgs) {
-  return promise.then(result => {
+  return promise.then((result) => {
     return [result, ...extraArgs];
   });
 };

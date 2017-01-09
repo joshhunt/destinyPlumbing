@@ -1,63 +1,31 @@
 const fs = require('fs');
-const _ = require('lodash');
 
-const definitions = require('./definitions');
-const fileManager = require('./fileManager');
-const { mapPromiseAll, readFile } = require('./utils');
+const { mapLimitPromise } = require('./utils');
 
 const RAW_DIR = './data';
-
-function processItems(inventoryItems, lang) {
-  const grouped = _(inventoryItems)
-    .toPairs()
-    .map(([hash, item]) => {
-      // Yeah, this mutates all the items as well
-      if (item.icon) {
-        item.icon = `https://bungie.net${item.icon}`;
-      }
-
-      delete item.secondaryIcon;
-      delete item.equippingBlock;
-      delete item.sources;
-
-      return [hash, item];
-    })
-    .groupBy(([hash, item]) => {
-      const type = definitions.itemType[item.itemType.toString()];
-      return type;
-    })
-    .reduce((acc, items, itemType) => {
-      acc[itemType] = _.fromPairs(items);
-
-      return acc;
-    }, {});
-
-  grouped.All = inventoryItems;
-
-  const promises = _.map(grouped, (items, itemType) => {
-    return fileManager.saveFile([lang, 'items', `${itemType}.json`], items);
-  });
-
-  return Promise.all(promises);
-}
+const LANGUAGE_CONCURRENCY = 1;
 
 module.exports = function furtherProcessDumps() {
-  console.log('running further process dumps');
-  const langs = fs.readdirSync(RAW_DIR).filter((filename) => {
-    return !filename.includes('.json');
-  });
+  console.log('\n## Running additional processing tasks');
 
-  return mapPromiseAll(langs, 1, (lang) => {
-    readFile(`./data/${lang}/raw/DestinyInventoryItemDefinition.json`)
-      .then((fileStream) => {
-        const inventoryItems = JSON.parse(fileStream.toString);
-        return processItems(inventoryItems, lang);
-      });
+  const langs = fs.readdirSync(RAW_DIR).filter(f => !f.includes('.json'));
+
+  return mapLimitPromise(langs, LANGUAGE_CONCURRENCY, (lang) => {
+    console.log('\n## Processing', lang, 'further');
+    const pathPrefex = `${RAW_DIR}/${lang}`;
+
+    return Promise.resolve() // just a stylistic preference to get all tasks in line
+      .then(() => require('./tasks/createItemDumps')(pathPrefex, lang))
+      .then(() => require('./tasks/strikeDrops')(pathPrefex, lang));
   });
 };
 
+
+// Run this module if called directly with node furtherProcessDumps
 if (!module.parent) {
-  module.exports().catch((err) => {
+  module.exports()
+  .then(() => console.log('done apparently'))
+  .catch((err) => {
     console.log('Error');
     console.log(err);
   });
