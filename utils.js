@@ -1,6 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const async = require('async');
 
 const _ = require('lodash');
 const mkdirp = require('mkdirp');
@@ -70,7 +71,7 @@ module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
 module.exports.resolveCb = resolveCb;
 
 module.exports.changeExt = function changeExt(input, newExt) {
-  return path.parse(input).name + '.' + newExt;
+  return `${path.parse(input).name}.${newExt}`;
 };
 
 module.exports.writeFile = function writeFile(dest, contents) {
@@ -143,9 +144,7 @@ module.exports.unzipFile = function cacheableUnzipFile(dest, orig) {
 };
 
 module.exports.alsoResolveWith = function alsoResolveWith(promise, ...extraArgs) {
-  return promise.then(result => {
-    return [result, ...extraArgs];
-  });
+  return promise.then(result => [result, ...extraArgs]);
 };
 
 module.exports.mapPromiseAll = function mapPromiseAll(items, func) {
@@ -158,13 +157,25 @@ module.exports.notify = function notify(msg) {
 
   if (!IFFT_URL) {
     console.log('[Not sending notification because IFFT_URL not defined]');
+    return Promise.resolve();
   }
 
-  fetch(IFFT_URL, {
+  return fetch(IFFT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       value1: msg,
     }),
+  });
+};
+
+
+module.exports.mapLimitPromise = function mapLimitPromise(items, limit, func) {
+  return new Promise((resolve, reject) => {
+    async.mapLimit(items, limit, (item, cb) => {
+      func(item)
+        .then(result => cb(null, result))
+        .catch(cb);
+    }, resolveCb(resolve, reject));
   });
 };

@@ -40,3 +40,7 @@ axios.get(MANIFEST_URL, {
   console.log(err);
   notify(`destiny.plumbing quit with an error ${err.message}`);
 });
+
+process.on('unhandledRejection', (reason) => {
+  console.log(reason);
+});

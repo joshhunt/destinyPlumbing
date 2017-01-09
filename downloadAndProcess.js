@@ -1,9 +1,8 @@
 require('isomorphic-fetch');
 
 const axios = require('axios');
-const async = require('async');
 
-const { downloadToFile, unzipFile, changeExt, resolveCb, alsoResolveWith, mapPromiseAll } = require('./utils');
+const { downloadToFile, unzipFile, changeExt, alsoResolveWith, mapPromiseAll, mapLimitPromise } = require('./utils');
 const processDatabase = require('./dumpMobileWorldContent');
 const furtherProcessDumps = require('./furtherProcessDumps');
 const fileManager = require('./fileManager');
@@ -11,17 +10,13 @@ const fileManager = require('./fileManager');
 const MANIFEST_URL = 'https://www.bungie.net/platform/Destiny/Manifest/';
 const API_KEY = '07ccdc0787034cabb78110651e94ccfc';
 
+const LANG_LIMIT = 1;
+
 function getSqlFile(dumpPath, dumpLang) {
   const dumpUrl = `https://www.bungie.net${dumpPath}`;
 
   return downloadToFile(changeExt(dumpPath, 'zip'), dumpUrl, dumpLang)
     .then(zipFile => unzipFile('', zipFile));
-}
-
-function mapLimit(items, limit, func) {
-  return new Promise((resolve, reject) => {
-    async.mapLimit(items, limit, func, resolveCb(resolve, reject));
-  });
 }
 
 let BUNGIE_MANIFEST;
@@ -48,12 +43,10 @@ module.exports = () => {
     });
   })
   .then((results) => {
-    return mapLimit(results, 1, ([sqlFile, lang], cb) => {
+    return mapLimitPromise(results, LANG_LIMIT, ([sqlFile, lang]) => {
       console.log('Dumping', lang);
 
-      return processDatabase(sqlFile, lang)
-        .then(r => cb(null, r))
-        .catch(cb);
+      return processDatabase(sqlFile, lang);
     });
   })
   .then(() => {

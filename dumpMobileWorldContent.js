@@ -1,14 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const async = require('async');
-
 const sqlite3 = require('sqlite3').verbose();
 const _ = require('lodash');
 
 const fileManager = require('./fileManager');
-const { resolveCb } = require('./utils');
+const { resolveCb, mapLimitPromise } = require('./utils');
 
-const MAX_LIMIT = 4;
+const TABLES_LIMIT = 1;
 
 function die(row, msg) {
   console.log('-----');
@@ -28,17 +24,17 @@ function queryDb(db, ...queryArgs) {
 }
 
 function processTable(db, tableName) {
-  // console.log('Processing ' + tableName);
+  console.log('Processing ' + tableName);
   return queryDb(db, `select * from ${tableName}`)
     .then((rows) => {
-
       const items = rows.reduce((acc, row, index) => {
         const rowData = JSON.parse(row.json);
         let rowID;
 
         // TODO: DestinyGrimoireDefinition doesnt get sensisble IDs
         if (_.has(row, 'id')) {
-          rowID = row.id >>> 0; // convert from signed-32bit-as-Number to unsigned-32bit-as-Number
+          // convert from signed-32bit-as-Number to unsigned-32bit-as-Number
+          rowID = row.id >>> 0; // eslint-disable-line
         } else if (_.has(row, 'key')) {
           rowID = row.key;
         } else {
@@ -124,9 +120,9 @@ module.exports = function processDatabase(filePath, lang) {
 
       console.log(`Found ${rows.length} tables. Extracting all the items`);
 
-      return Promise.all(rows.map(({ name }) => {
+      return mapLimitPromise(rows, TABLES_LIMIT, ({ name }) => {
         return processTable(db, name);
-      }));
+      });
     })
     .then(everything => saveAll(everything, lang));
 };
