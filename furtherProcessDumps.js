@@ -3,7 +3,7 @@ const _ = require('lodash');
 
 const definitions = require('./definitions');
 const fileManager = require('./fileManager');
-const { mapPromiseAll } = require('./utils');
+const { mapPromiseAll, readFile } = require('./utils');
 
 const RAW_DIR = './data';
 
@@ -47,9 +47,12 @@ module.exports = function furtherProcessDumps() {
     return !filename.includes('.json');
   });
 
-  return mapPromiseAll(langs, (lang) => {
-    const inventoryItems = require(`./data/${lang}/raw/DestinyInventoryItemDefinition.json`);
-    return processItems(inventoryItems, lang);
+  return mapPromiseAll(langs, 1, (lang) => {
+    readFile(`./data/${lang}/raw/DestinyInventoryItemDefinition.json`)
+      .then((fileStream) => {
+        const inventoryItems = JSON.parse(fileStream.toString);
+        return processItems(inventoryItems, lang);
+      });
   });
 };
 

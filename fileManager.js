@@ -19,12 +19,14 @@ function saveFileWorker(task, cb) {
   console.log(id, 'uploading to', s3Key);
   console.log('  saving to', filePath);
 
-  return Promise.all([
-    writeFile(filePath, fileBody),
-    uploadToS3(s3Key, fileBody, {
-      ContentType: 'application/json',
-    }),
-  ]).then(() => {
+  const promises = [
+    uploadToS3(s3Key, fileBody, { ContentType: 'application/json' }),
+  ];
+
+  // only save file if we set the option to
+  process.env.WRITE_FILES && promises.push(writeFile(filePath, fileBody));
+
+  return Promise.all(promises).then(() => {
     console.log(id, 'successfully saved');
     cb();
   })
