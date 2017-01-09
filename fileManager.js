@@ -10,7 +10,9 @@ function saveFileWorker(task, cb) {
 
   const filePath = pathLib.join(...['data'].concat(path));
   const s3Key = path.join('/');
-  const fileBody = JSON.stringify(obj);
+
+  // pretty print significantly increases file size, so ensure gzip is used
+  const fileBody = JSON.stringify(obj, null, 2);
 
   manifestStore.push({ path, filePath, s3Key, obj });
 

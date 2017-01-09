@@ -11,12 +11,25 @@ module.exports = function furtherProcessDumps() {
   const langs = fs.readdirSync(RAW_DIR).filter(f => !f.includes('.json'));
 
   return mapLimitPromise(langs, LANGUAGE_CONCURRENCY, (lang) => {
-    console.log('\n## Processing', lang, 'further');
+    console.log('## Processing', lang, 'further');
     const pathPrefex = `${RAW_DIR}/${lang}`;
 
-    return Promise.resolve() // just a stylistic preference to get all tasks in line
-      .then(() => require('./tasks/createItemDumps')(pathPrefex, lang))
-      .then(() => require('./tasks/strikeDrops')(pathPrefex, lang));
+    const tasks = [
+      'createItemDumps',
+      'strikeDrops',
+    ];
+
+    return tasks.reduce((promise, taskName) => {
+      return promise
+        .then(() => {
+          console.log('* Running task', taskName);
+          return require(`./tasks/${taskName}`)(pathPrefex, lang);
+        });
+    }, Promise.resolve());
+
+    // return Promise.resolve() // just a stylistic preference to get all tasks in line
+    //   .then(() => require('./tasks/createItemDumps')(pathPrefex, lang))
+    //   .then(() => require('./tasks/strikeDrops')(pathPrefex, lang));
   });
 };
 
