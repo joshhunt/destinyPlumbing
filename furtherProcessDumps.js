@@ -1,6 +1,7 @@
 const fs = require('fs');
 
 const { mapLimitPromise } = require('./utils');
+const fileManager = require('./fileManager');
 
 const RAW_DIR = './data';
 const LANGUAGE_CONCURRENCY = 2;
@@ -19,6 +20,7 @@ module.exports = function furtherProcessDumps() {
       'strikeDrops',
     ];
 
+    // Run each of the tasks async
     return tasks.reduce((promise, taskName) => {
       return promise
         .then(() => {
@@ -37,7 +39,10 @@ module.exports = function furtherProcessDumps() {
 // Run this module if called directly with node furtherProcessDumps
 if (!module.parent) {
   module.exports()
-  .then(() => console.log('done apparently'))
+  .then(() => {
+    console.log('done apparently');
+    console.log(fileManager.collectManifest());
+  })
   .catch((err) => {
     console.log('Error');
     console.log(err);

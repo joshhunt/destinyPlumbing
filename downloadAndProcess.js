@@ -26,10 +26,10 @@ module.exports = () => {
     headers: { 'X-API-Key': API_KEY },
   })
   .then((resp) => {
-    // const languages = {
-    //   en: resp.data.Response.mobileWorldContentPaths.en,
-    // };
-    const languages = resp.data.Response.mobileWorldContentPaths;
+    const languages = {
+      en: resp.data.Response.mobileWorldContentPaths.en,
+    };
+    // const languages = resp.data.Response.mobileWorldContentPaths;
 
     BUNGIE_MANIFEST = resp.data.Response;
 
@@ -62,3 +62,17 @@ module.exports = () => {
     });
   });
 };
+
+
+// Run this module if called directly with node furtherProcessDumps
+if (!module.parent) {
+  module.exports()
+  .then(() => {
+    console.log('done apparently');
+    console.log(fileManager.collectManifest());
+  })
+  .catch((err) => {
+    console.log('Error');
+    console.log(err);
+  });
+}

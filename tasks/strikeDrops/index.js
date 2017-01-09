@@ -52,7 +52,7 @@ module.exports = function strikeDrops(pathPrefix, lang) {
     openJSON(`${pathPrefix}/raw/DestinyActivityTypeDefinition.json`),
   ];
 
-  Promise.all(promises)
+  return Promise.all(promises)
     .then((results) => {
       const [
         armourDefs,
