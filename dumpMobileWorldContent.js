@@ -23,7 +23,7 @@ function queryDb(db, ...queryArgs) {
   });
 }
 
-function processTable(db, tableName) {
+function processTable(db, tableName, lang) {
   console.log('Processing ' + tableName);
   return queryDb(db, `select * from ${tableName}`)
     .then((rows) => {
@@ -52,16 +52,12 @@ function processTable(db, tableName) {
         return Object.assign({ [rowID]: rowData }, acc);
       }, {});
 
-      return { tableName, items };
+      return { tableName, items, lang };
     });
 }
 
-function saveAll(rows, lang) {
-  const promises = rows.map(({ tableName, items }) => {
-    return fileManager.saveFile([lang, 'raw', `${tableName}.json`], items);
-  });
-
-  return Promise.all(promises);
+function saveTable({ tableName, items, lang }) {
+  return fileManager.saveFile([lang, 'raw', `${tableName}.json`], items);
 }
 
 module.exports = function processDatabase(filePath, lang) {
@@ -121,8 +117,9 @@ module.exports = function processDatabase(filePath, lang) {
       console.log(`Found ${rows.length} tables. Extracting all the items`);
 
       return mapLimitPromise(rows, TABLES_LIMIT, ({ name }) => {
-        return processTable(db, name);
+        return processTable(db, name, lang)
+          .then(saveTable);
       });
-    })
-    .then(everything => saveAll(everything, lang));
+    });
+    // .then(everything => saveAll(everything, lang));
 };
