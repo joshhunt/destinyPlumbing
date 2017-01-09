@@ -26,10 +26,10 @@ module.exports = () => {
     headers: { 'X-API-Key': API_KEY },
   })
   .then((resp) => {
-    const languages = {
-      en: resp.data.Response.mobileWorldContentPaths.en,
-    };
-    // const languages = resp.data.Response.mobileWorldContentPaths;
+    // const languages = {
+    //   en: resp.data.Response.mobileWorldContentPaths.en,
+    // };
+    const languages = resp.data.Response.mobileWorldContentPaths;
 
     BUNGIE_MANIFEST = resp.data.Response;
 
