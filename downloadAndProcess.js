@@ -10,7 +10,7 @@ const fileManager = require('./fileManager');
 const MANIFEST_URL = 'https://www.bungie.net/platform/Destiny/Manifest/';
 const API_KEY = '07ccdc0787034cabb78110651e94ccfc';
 
-const LANG_LIMIT = 1;
+const LANG_LIMIT = 2;
 
 function getSqlFile(dumpPath, dumpLang) {
   const dumpUrl = `https://www.bungie.net${dumpPath}`;

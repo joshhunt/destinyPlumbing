@@ -176,6 +176,11 @@ module.exports.readFile = function readFile(filePath) {
   });
 };
 
+module.exports.openJSON = function openJSON(filePath) {
+  return module.exports.readFile(filePath)
+    .then(f => JSON.parse(f.toString()));
+};
+
 module.exports.mapLimitPromise = function mapLimitPromise(items, limit, func) {
   return new Promise((resolve, reject) => {
     async.mapLimit(items, limit, (item, cb) => {

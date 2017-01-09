@@ -3,7 +3,7 @@ const fs = require('fs');
 const { mapLimitPromise } = require('./utils');
 
 const RAW_DIR = './data';
-const LANGUAGE_CONCURRENCY = 1;
+const LANGUAGE_CONCURRENCY = 2;
 
 module.exports = function furtherProcessDumps() {
   console.log('\n## Running additional processing tasks');

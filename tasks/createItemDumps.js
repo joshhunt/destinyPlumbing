@@ -3,7 +3,7 @@ const _ = require('lodash');
 
 const definitions = require('../definitions');
 const fileManager = require('../fileManager');
-const { readFile } = require('../utils');
+const { openJSON } = require('../utils');
 
 function processItems(inventoryItems, lang) {
   const grouped = _(inventoryItems)
@@ -56,9 +56,6 @@ function processItems(inventoryItems, lang) {
 }
 
 module.exports = function createItemDumps(pathPrefix, lang) {
-  return readFile(`${pathPrefix}/raw/DestinyInventoryItemDefinition.json`)
-    .then((fileStream) => {
-      const inventoryItems = JSON.parse(fileStream.toString());
-      return processItems(inventoryItems, lang);
-    });
+  return openJSON(`${pathPrefix}/raw/DestinyInventoryItemDefinition.json`)
+    .then(items => processItems(items, lang));
 };

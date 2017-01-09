@@ -31,7 +31,7 @@ function saveFileWorker(task, cb) {
   .catch(cb);
 }
 
-const fileUploadQueue = async.queue(saveFileWorker, 2);
+const fileUploadQueue = async.queue(saveFileWorker, 4);
 
 module.exports.saveFile = function saveFileQueuer(path, obj) {
   return new Promise((resolve, reject) => {
