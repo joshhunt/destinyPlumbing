@@ -1,46 +1,10 @@
 const _ = require('lodash');
 
-const definitions = require('../../definitions');
 const fileManager = require('../../fileManager');
 const { openJSON } = require('../../utils');
+const { cleanActivities, getItem } = require('../commonUtils');
 
 const dropData = require('./drops.json');
-
-const destinationFallback = {};
-const placeFallback = {};
-const activityTypeFallback = {};
-
-const ACTIVITY_FIELDS = [
-  'activityHash',
-  'activityName',
-  'pgcrImage',
-  // 'icon',
-  // 'releaseIcon',
-];
-
-const ITEM_FIELDS = [
-  'itemName',
-  'icon',
-  'itemHash',
-  'itemTypeName',
-];
-
-function cleanActivities({ activityDefs, destinationDefs, placeDefs, activityTypeDefs }) {
-  return _.mapValues(activityDefs, (activity) => {
-    const cleaned = _.pick(activity, ACTIVITY_FIELDS);
-    const destination = destinationDefs[activity.destinationHash] || destinationFallback;
-    const place = placeDefs[activity.placeHash] || placeFallback;
-    const activityType = activityTypeDefs[activity.activityTypeHash] || activityTypeFallback;
-
-    return _.extend(cleaned, {
-      isClassified: activity.activityName === 'Classified',
-      destinationName: destination.destinationName,
-      destinationIcon: destination.icon,
-      placeName: place.placeName,
-      activityTypeName: activityType.activityTypeName,
-    });
-  });
-}
 
 module.exports = function strikeDrops(pathPrefix, lang) {
   const promises = [
@@ -101,17 +65,8 @@ module.exports = function strikeDrops(pathPrefix, lang) {
           return acc.concat(newItems);
         }, [])
         .reduce((acc, itemHash) => {
-          const item = itemDefs[itemHash];
-          const refinedItem = _.pick(item, ITEM_FIELDS);
-
-          const className = definitions.classType[item.classType];
-
-          if (className && !refinedItem.itemTypeName.includes(className)) {
-            refinedItem.itemTypeName = `${className} ${refinedItem.itemTypeName}`;
-          }
-
           return _.extend({}, acc, {
-            [item.itemHash]: refinedItem,
+            [itemHash]: getItem(itemDefs, itemHash),
           });
         }, {});
 

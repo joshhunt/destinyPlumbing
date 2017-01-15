@@ -4,7 +4,7 @@ const _ = require('lodash');
 const fileManager = require('./fileManager');
 const { resolveCb, mapLimitPromise } = require('./utils');
 
-const TABLES_LIMIT = 1;
+const TABLES_LIMIT = 2;
 
 function die(row, msg) {
   console.log('-----');
@@ -24,7 +24,8 @@ function queryDb(db, ...queryArgs) {
 }
 
 function processTable(db, tableName, lang) {
-  console.log('Processing ' + tableName);
+  console.log('Processing', tableName);
+
   return queryDb(db, `select * from ${tableName}`)
     .then((rows) => {
       const items = rows.reduce((acc, row, index) => {

@@ -4,7 +4,7 @@ const { mapLimitPromise } = require('./utils');
 const fileManager = require('./fileManager');
 
 const RAW_DIR = './data';
-const LANGUAGE_CONCURRENCY = 2;
+const LANGUAGE_CONCURRENCY = 4;
 
 module.exports = function furtherProcessDumps() {
   console.log('\n## Running additional processing tasks');
@@ -16,8 +16,9 @@ module.exports = function furtherProcessDumps() {
     const pathPrefex = `${RAW_DIR}/${lang}`;
 
     const tasks = [
-      'createItemDumps',
-      'strikeDrops',
+      // 'createItemDumps',
+      // 'strikeDrops',
+      'raidDrops',
     ];
 
     // Run each of the tasks async
