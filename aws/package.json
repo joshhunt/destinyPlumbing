@@ -1,0 +1,16 @@
+{
+  "name": "destiny-plumbing-aws",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.7.21",
+    "axios": "^0.15.3",
+    "node-lambda": "^0.8.11"
+  }
+}

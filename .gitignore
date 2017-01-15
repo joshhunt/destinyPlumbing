@@ -3,3 +3,6 @@ working/
 node_modules
 lastrun.txt
 check.sh
+.env
+deploy.env
+event.json
