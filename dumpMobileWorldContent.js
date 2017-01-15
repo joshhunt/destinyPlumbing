@@ -4,7 +4,7 @@ const _ = require('lodash');
 const fileManager = require('./fileManager');
 const { resolveCb, mapLimitPromise } = require('./utils');
 
-const TABLES_LIMIT = 2;
+const TABLES_LIMIT = 4;
 
 function die(row, msg) {
   console.log('-----');
