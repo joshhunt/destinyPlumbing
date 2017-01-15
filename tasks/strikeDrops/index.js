@@ -8,8 +8,7 @@ const dropData = require('./drops.json');
 
 module.exports = function strikeDrops(pathPrefix, lang) {
   const promises = [
-    openJSON(`${pathPrefix}/items/Armor.json`),
-    openJSON(`${pathPrefix}/items/Weapon.json`),
+    openJSON(`${pathPrefix}/items/All.json`),
     openJSON(`${pathPrefix}/raw/DestinyActivityDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyDestinationDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyPlaceDefinition.json`),
@@ -19,15 +18,12 @@ module.exports = function strikeDrops(pathPrefix, lang) {
   return Promise.all(promises)
     .then((results) => {
       const [
-        armourDefs,
-        weaponDefs,
+        itemDefs,
         activityDefs,
         destinationDefs,
         placeDefs,
         activityTypeDefs,
       ] = results;
-
-      const itemDefs = _.extend({}, weaponDefs, armourDefs);
 
       const activities = cleanActivities({
         activityDefs,

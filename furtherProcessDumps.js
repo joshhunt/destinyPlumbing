@@ -16,12 +16,13 @@ module.exports = function furtherProcessDumps() {
     const pathPrefex = `${RAW_DIR}/${lang}`;
 
     const tasks = [
-      // 'createItemDumps',
-      // 'strikeDrops',
+      // This must be first because others below will depend on it.
+      'createItemDumps',
+      'strikeDrops',
       'raidDrops',
     ];
 
-    // Run each of the tasks async
+    // Run each of the tasks sync
     return tasks.reduce((promise, taskName) => {
       return promise
         .then(() => {
