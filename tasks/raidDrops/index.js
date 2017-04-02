@@ -4,7 +4,7 @@ const fileManager = require('../../fileManager');
 const { openJSON } = require('../../utils');
 const { cleanActivities, getItem } = require('../commonUtils');
 
-const wrathDrops = require('./wrathDrops.json');
+const raidDrops = require('./raidDrops.json');
 
 const add = (obj, key, item) => {
   return Object.assign({}, obj, { [key]: item });
@@ -36,15 +36,15 @@ module.exports = function strikeDrops(pathPrefix, lang) {
         activityTypeDefs,
       });
 
-      const raidActivities = wrathDrops.reduce((acc, wrathDroplist) => {
+      const raidActivities = raidDrops.reduce((acc, wrathDroplist) => {
         const raid = activities[wrathDroplist.activityHash];
         raid.dropListID = wrathDroplist.id;
         return add(acc, wrathDroplist.activityHash, raid);
       }, {});
 
-      const dropLists = _.keyBy(wrathDrops, 'id');
+      const dropLists = _.keyBy(raidDrops, 'id');
 
-      const items = _(wrathDrops)
+      const items = _(raidDrops)
         .flatMap(({ sections }) => {
           return _.flatMap(sections, 'items');
         })
@@ -58,6 +58,6 @@ module.exports = function strikeDrops(pathPrefix, lang) {
         items,
       };
 
-      return fileManager.saveFile([lang, 'collections', 'combinedWoTMDrops.json'], data);
+      return fileManager.saveFile([lang, 'collections', 'combinedRaidDrops.json'], data);
     });
 };
