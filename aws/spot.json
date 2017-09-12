@@ -1,0 +1,36 @@
+{
+  "IamFleetRole": "arn:aws:iam::167180637055:role/aws-ec2-spot-fleet-role",
+  "AllocationStrategy": "lowestPrice",
+  "TargetCapacity": 1,
+  "SpotPrice": "0.529",
+  "ValidFrom": "___REPLACE_ME___",
+  "ValidUntil": "___REPLACE_ME___",
+  "TerminateInstancesWithExpiration": true,
+  "LaunchSpecifications": [
+    {
+      "ImageId": "ami-20151143",
+      "InstanceType": "c3.2xlarge",
+      "KeyName": "private-use",
+      "SpotPrice": "0.529",
+      "IamInstanceProfile": {
+        "Arn": "arn:aws:iam::167180637055:instance-profile/destinyPlumbingRole"
+      },
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/xvda",
+          "Ebs": {
+            "DeleteOnTermination": true,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-fc40f16d"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        { "GroupId": "sg-299cf44d" }
+      ],
+      "UserData": "___REPLACE_ME___"
+    }
+  ],
+  "Type": "request"
+}

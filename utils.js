@@ -14,6 +14,9 @@ const DIR_PREFIX = './working'; // relative to project root when ran with yarn
 mkdirp(DIR_PREFIX);
 
 const IFFT_URL = process.env.IFFT_URL;
+const SUPPRESS_S3_UPLOAD = process.env.SUPPRESS_S3_UPLOAD;
+
+console.log('IFFT_URL:', IFFT_URL);
 
 const s3 = new AWS.S3({ region: process.env.AWS_REGION });
 
@@ -47,13 +50,21 @@ function ensureDir(dest) {
 module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
   const key = `${_key}`;
 
+  if (SUPPRESS_S3_UPLOAD) {
+    // console.log(`Not uploading ${key} to S3`);
+    return Promise.resolve();
+  }
+
   return new Promise((resolve, reject) => {
-    const params = _.extend({
-      Bucket: process.env.AWS_S3BUCKET,
-      Key: key,
-      Body: body,
-      ACL: 'public-read',
-    }, extraArgs || {});
+    const params = _.extend(
+      {
+        Bucket: process.env.AWS_S3BUCKET,
+        Key: key,
+        Body: body,
+        ACL: 'public-read',
+      },
+      extraArgs || {}
+    );
 
     s3.putObject(params, (err, resp) => {
       if (err) {
@@ -78,7 +89,9 @@ module.exports.writeFile = function writeFile(dest, contents) {
   return new Promise((resolve, reject) => {
     ensureDir(dest)
       .then(() => {
-        const fileContents = _.isString(contents) ? contents : JSON.stringify(contents, null, 2);
+        const fileContents = _.isString(contents)
+          ? contents
+          : JSON.stringify(contents, null, 2);
         fs.writeFile(dest, fileContents, resolveCb(resolve, reject));
       })
       .catch(reject);
@@ -88,15 +101,17 @@ module.exports.writeFile = function writeFile(dest, contents) {
 function downloadToFile(destPath, url) {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(destPath);
-    const req = https.get(url, (resp) => {
+    const req = https.get(url, resp => {
       resp.pipe(file);
 
-      file.on('finish', () => file.close(() => {
-        resolve(destPath);
-      }));
+      file.on('finish', () =>
+        file.close(() => {
+          resolve(destPath);
+        })
+      );
     });
 
-    req.on('error', (err) => {
+    req.on('error', err => {
       fs.unlink(destPath);
       reject(err);
     });
@@ -107,7 +122,7 @@ module.exports.downloadToFile = function cacheableDownloadToFile(dest, url) {
   const destPath = path.join(DIR_PREFIX, dest);
 
   return new Promise((resolve, reject) => {
-    fs.access(destPath, (err) => {
+    fs.access(destPath, err => {
       if (err) {
         // file doesnt exist, download it
         downloadToFile(destPath, url)
@@ -137,14 +152,19 @@ function unzipFile(dest, orig) {
 
 module.exports.unzipFile = function cacheableUnzipFile(dest, orig) {
   const destPath = path.join(DIR_PREFIX, dest);
-  const outputFile = path.join(DIR_PREFIX, module.exports.changeExt(orig, 'content'));
+  const outputFile = path.join(
+    DIR_PREFIX,
+    module.exports.changeExt(orig, 'content')
+  );
 
-  return unzipFile(destPath, orig)
-    .then(() => outputFile);
+  return unzipFile(destPath, orig).then(() => outputFile);
 };
 
-module.exports.alsoResolveWith = function alsoResolveWith(promise, ...extraArgs) {
-  return promise.then((result) => {
+module.exports.alsoResolveWith = function alsoResolveWith(
+  promise,
+  ...extraArgs
+) {
+  return promise.then(result => {
     return [result, ...extraArgs];
   });
 };
@@ -159,6 +179,7 @@ module.exports.notify = function notify(msg) {
 
   if (!IFFT_URL) {
     console.log('[Not sending notification because IFFT_URL not defined]');
+    return;
   }
 
   fetch(IFFT_URL, {
@@ -177,16 +198,20 @@ module.exports.readFile = function readFile(filePath) {
 };
 
 module.exports.openJSON = function openJSON(filePath) {
-  return module.exports.readFile(filePath)
-    .then(f => JSON.parse(f.toString()));
+  return module.exports.readFile(filePath).then(f => JSON.parse(f.toString()));
 };
 
 module.exports.mapLimitPromise = function mapLimitPromise(items, limit, func) {
   return new Promise((resolve, reject) => {
-    async.mapLimit(items, limit, (item, cb) => {
-      func(item)
-        .then(result => cb(null, result))
-        .catch(cb);
-    }, resolveCb(resolve, reject));
+    async.mapLimit(
+      items,
+      limit,
+      (item, cb) => {
+        func(item)
+          .then(result => cb(null, result))
+          .catch(cb);
+      },
+      resolveCb(resolve, reject)
+    );
   });
 };

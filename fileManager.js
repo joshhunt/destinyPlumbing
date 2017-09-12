@@ -5,11 +5,24 @@ const async = require('async');
 
 const manifestStore = [];
 
+const PATH_PREFIX = process.env.PATH_PREFIX;
+
+function pathsFromArray(path) {
+  const finalPath = PATH_PREFIX ? [PATH_PREFIX, ...path] : path;
+
+  const filePath = pathLib.join('data', ...finalPath);
+  const s3Key = finalPath.join('/');
+
+  return {
+    filePath,
+    s3Key,
+  };
+}
+
 function saveFileWorker(task, cb) {
   const { path, obj } = task;
 
-  const filePath = pathLib.join(...['data'].concat(path));
-  const s3Key = path.join('/');
+  const { filePath, s3Key } = pathsFromArray(path);
 
   // pretty print significantly increases file size, so ensure gzip is used
   const fileBody = JSON.stringify(obj, null, 2);
@@ -26,11 +39,12 @@ function saveFileWorker(task, cb) {
   // only save file if we set the option to
   process.env.WRITE_FILES && promises.push(writeFile(filePath, fileBody));
 
-  return Promise.all(promises).then(() => {
-    console.log(id, 'successfully saved');
-    cb();
-  })
-  .catch(cb);
+  return Promise.all(promises)
+    .then(() => {
+      console.log(id, 'successfully saved');
+      cb();
+    })
+    .catch(cb);
 }
 
 const fileUploadQueue = async.queue(saveFileWorker, 4);
@@ -58,11 +72,13 @@ module.exports.collectManifest = function collectManifest() {
 };
 
 module.exports.saveManifest = function saveManifest(extraData = {}) {
-  const manifest = Object.assign({}, module.exports.collectManifest(), extraData);
-  const s3Key = 'index.json';
+  const manifest = Object.assign(extraData, module.exports.collectManifest());
+
+  const { filePath, s3Key } = pathsFromArray(['index.json']);
+
   const fileBody = JSON.stringify(manifest, null, 2);
 
-  writeFile('data/index.json', fileBody);
+  process.env.WRITE_FILES && writeFile(filePath, fileBody);
 
   return uploadToS3(s3Key, fileBody, {
     ContentType: 'application/json',

@@ -1,0 +1,20 @@
+#cloud-config
+runcmd:
+ - |
+   echo "Sourcing NVM"
+   export NVM_DIR="/home/ubuntu/.nvm"
+   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+   echo "Activing node 6"
+   nvm use 6
+
+   echo "Pulling latest code"
+   cd /home/ubuntu/destinyPlumbing
+   git pull
+
+   echo "Installing latest dependencies"
+   npm install
+
+   AWS_S3BUCKET=destiny.plumbing-new \
+    WRITE_FILES=true \
+    node downloadAndProcess.js
