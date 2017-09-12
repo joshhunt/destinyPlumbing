@@ -19,45 +19,60 @@ module.exports = function strikeDrops(pathPrefix, lang) {
     openJSON(`${pathPrefix}/raw/DestinyActivityTypeDefinition.json`),
   ];
 
-  return Promise.all(promises)
-    .then((results) => {
-      const [
-        itemDefs,
-        activityDefs,
-        destinationDefs,
-        placeDefs,
-        activityTypeDefs,
-      ] = results;
+  return Promise.all(promises).then(results => {
+    const [
+      itemDefs,
+      activityDefs,
+      destinationDefs,
+      placeDefs,
+      activityTypeDefs,
+    ] = results;
 
-      const activities = cleanActivities({
-        activityDefs,
-        destinationDefs,
-        placeDefs,
-        activityTypeDefs,
-      });
+    const activities = cleanActivities({
+      activityDefs,
+      destinationDefs,
+      placeDefs,
+      activityTypeDefs,
+    });
 
-      const raidActivities = raidDrops.reduce((acc, wrathDroplist) => {
-        const raid = activities[wrathDroplist.activityHash];
-        raid.dropListID = wrathDroplist.id;
-        return add(acc, wrathDroplist.activityHash, raid);
+    const raidActivities = raidDrops.reduce((acc, dropList) => {
+      const raid = activities[dropList.activityHash];
+
+      if (!raid) {
+        console.log(
+          `Could not find activity for ${dropList.id}:${dropList.activityHash}`
+        );
+        return acc;
+      }
+
+      raid.dropListID = dropList.id;
+      return add(acc, dropList.activityHash, raid);
+    }, {});
+
+    const dropLists = _.keyBy(raidDrops, 'id');
+
+    const items = _(raidDrops)
+      .flatMap(({ sections }) => {
+        return _.flatMap(sections, 'items');
+      })
+      .reduce((acc, itemHash) => {
+        const item = getItem(itemDefs, itemHash);
+        if (!item) {
+          console.log(`Could not find item for hash ${itemHash}`);
+          return acc;
+        }
+        return add(acc, itemHash, item);
       }, {});
 
-      const dropLists = _.keyBy(raidDrops, 'id');
+    const data = {
+      activities: raidActivities,
+      dropLists,
+      items,
+    };
 
-      const items = _(raidDrops)
-        .flatMap(({ sections }) => {
-          return _.flatMap(sections, 'items');
-        })
-        .reduce((acc, itemHash) => {
-          return add(acc, itemHash, getItem(itemDefs, itemHash));
-        }, {});
-
-      const data = {
-        activities: raidActivities,
-        dropLists,
-        items,
-      };
-
-      return fileManager.saveFile([lang, 'collections', 'combinedRaidDrops.json'], data);
-    });
+    return fileManager.saveFile(
+      [lang, 'collections', 'combinedRaidDrops.json'],
+      data
+    );
+  });
 };

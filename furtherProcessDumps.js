@@ -22,8 +22,8 @@ module.exports = function furtherProcessDumps() {
     const tasks = [
       // This must be first because others below will depend on it.
       'createItemDumps',
-      // 'strikeDrops',
-      // 'raidDrops',
+      'strikeDrops',
+      'raidDrops',
     ];
 
     // Run each of the tasks sync

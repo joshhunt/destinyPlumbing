@@ -6,19 +6,17 @@ const destinationFallback = {};
 const placeFallback = {};
 const activityTypeFallback = {};
 
-const ACTIVITY_FIELDS = [
-  'activityHash',
-  'activityName',
-  'pgcrImage',
-];
+const ACTIVITY_FIELDS = ['activityHash', 'activityName', 'pgcrImage'];
 
 module.exports.cleanActivities = function cleanActivities(params) {
   const { activityDefs, destinationDefs, placeDefs, activityTypeDefs } = params;
-  return _.mapValues(activityDefs, (activity) => {
+  return _.mapValues(activityDefs, activity => {
     const cleaned = _.pick(activity, ACTIVITY_FIELDS);
-    const destination = destinationDefs[activity.destinationHash] || destinationFallback;
+    const destination =
+      destinationDefs[activity.destinationHash] || destinationFallback;
     const place = placeDefs[activity.placeHash] || placeFallback;
-    const activityType = activityTypeDefs[activity.activityTypeHash] || activityTypeFallback;
+    const activityType =
+      activityTypeDefs[activity.activityTypeHash] || activityTypeFallback;
 
     return _.extend(cleaned, {
       isClassified: activity.activityName === 'Classified',
@@ -34,6 +32,10 @@ module.exports.getItem = function getItem(itemDefs, itemHash) {
   const item = itemDefs[itemHash];
   const refinedItem = _.pick(item, module.exports.ITEM_FIELDS);
 
+  if (!item) {
+    return null;
+  }
+
   const className = definitions.classType[item.classType];
 
   if (className && !refinedItem.itemTypeName.includes(className)) {
@@ -43,9 +45,4 @@ module.exports.getItem = function getItem(itemDefs, itemHash) {
   return refinedItem;
 };
 
-module.exports.ITEM_FIELDS = [
-  'itemName',
-  'icon',
-  'itemHash',
-  'itemTypeName',
-];
+module.exports.ITEM_FIELDS = ['itemName', 'icon', 'itemHash', 'itemTypeName'];
