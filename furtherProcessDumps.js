@@ -22,7 +22,7 @@ module.exports = function furtherProcessDumps() {
     const tasks = [
       // This must be first because others below will depend on it.
       'createItemDumps',
-      'strikeDrops',
+      // 'strikeDrops',
       'raidDrops',
     ];
 

@@ -6,7 +6,7 @@ const destinationFallback = {};
 const placeFallback = {};
 const activityTypeFallback = {};
 
-const ACTIVITY_FIELDS = ['activityHash', 'activityName', 'pgcrImage'];
+const ACTIVITY_FIELDS = ['activityHash', 'displayProperties', 'pgcrImage'];
 
 module.exports.cleanActivities = function cleanActivities(params) {
   const { activityDefs, destinationDefs, placeDefs, activityTypeDefs } = params;
@@ -28,9 +28,11 @@ module.exports.cleanActivities = function cleanActivities(params) {
   });
 };
 
+// TODO: use DestinyItemCategoryDefinitions and the DestinyItemDefinition.itemCategories property instead
 module.exports.getItem = function getItem(itemDefs, itemHash) {
   const item = itemDefs[itemHash];
   const refinedItem = _.pick(item, module.exports.ITEM_FIELDS);
+  // const refinedItem = _.omit(item, module.exports.ITEM_FIELDS_EXCLUDE);
 
   if (!item) {
     return null;
@@ -38,11 +40,16 @@ module.exports.getItem = function getItem(itemDefs, itemHash) {
 
   const className = definitions.classType[item.classType];
 
-  if (className && !refinedItem.itemTypeName.includes(className)) {
-    refinedItem.itemTypeName = `${className} ${refinedItem.itemTypeName}`;
+  if (className && !refinedItem.itemTypeDisplayName.includes(className)) {
+    refinedItem.itemTypeDisplayName = `${className} ${refinedItem.itemTypeDisplayName}`;
   }
 
   return refinedItem;
 };
 
-module.exports.ITEM_FIELDS = ['itemName', 'icon', 'itemHash', 'itemTypeName'];
+module.exports.ITEM_FIELDS = [
+  'hash',
+  'displayProperties',
+  'screenshot',
+  'itemTypeDisplayName',
+];

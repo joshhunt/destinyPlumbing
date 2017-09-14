@@ -3,9 +3,6 @@ module.exports.itemType = {
   1: 'Currency',
   2: 'Armor',
   3: 'Weapon',
-  4: 'Bounty',
-  5: 'CompletedBounty',
-  6: 'BountyReward',
   7: 'Message',
   8: 'Engram',
   9: 'Consumable',
@@ -15,14 +12,16 @@ module.exports.itemType = {
   13: 'QuestStepComplete',
   14: 'Emblem',
   15: 'Quest',
+  16: 'Subclass',
+  17: 'ClanBanner',
+  18: 'Aura',
+  19: 'Mod',
 };
 
 module.exports.itemSubType = {
   0: 'None',
   1: 'Crucible',
   2: 'Vanguard',
-  3: 'IronBanner',
-  4: 'Queen',
   5: 'Exotic',
   6: 'AutoRifle',
   7: 'Shotgun',
@@ -33,11 +32,11 @@ module.exports.itemSubType = {
   12: 'SniperRifle',
   13: 'PulseRifle',
   14: 'ScoutRifle',
-  15: 'Camera',
   16: 'Crm',
   17: 'Sidearm',
   18: 'Sword',
   19: 'Mask',
+  20: 'Shader',
 };
 
 module.exports.classType = {
