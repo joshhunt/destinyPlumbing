@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# cd /root/destinyPlumbing
+cd /root/destinyPlumbing
 
 git pull
+npm install
 
 export NVM_DIR="/root/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm

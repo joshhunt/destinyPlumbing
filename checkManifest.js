@@ -13,6 +13,7 @@ const lastRun = fs.readFileSync(LAST_RUN_FILE).toString();
 console.log('Prev ID:', lastRun);
 
 let didRun = false;
+let thisId;
 
 axios
   .get(MANIFEST_URL, {
