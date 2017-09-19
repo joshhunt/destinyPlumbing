@@ -1,7 +1,6 @@
 require('isomorphic-fetch');
 
 const axios = require('axios');
-const crypto = require('crypto');
 
 const {
   downloadToFile,
@@ -10,13 +9,13 @@ const {
   alsoResolveWith,
   mapPromiseAll,
   mapLimitPromise,
+  generateManifestID,
 } = require('./utils');
 const processDatabase = require('./dumpMobileWorldContent');
 const furtherProcessDumps = require('./furtherProcessDumps');
 const fileManager = require('./fileManager');
 
-const MANIFEST_URL = 'https://www.bungie.net/platform/Destiny2/Manifest/';
-const API_KEY = 'b661376f5d52484ea8a2f7d73407b96b';
+const { MANIFEST_URL, API_KEY } = require('./config.json');
 
 const LANG_LIMIT = 2;
 
@@ -68,13 +67,7 @@ module.exports = () => {
       console.log('');
       console.log('### Saving manifest.');
 
-      const idString = `${BUNGIE_MANIFEST.version}|${BUNGIE_MANIFEST
-        .mobileWorldContentPaths.en}`;
-
-      const id = crypto
-        .createHash('md5')
-        .update(idString)
-        .digest('hex');
+      const id = generateManifestID(BUNGIE_MANIFEST);
 
       return fileManager.saveManifest({
         id,

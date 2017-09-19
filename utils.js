@@ -1,6 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const _ = require('lodash');
 const mkdirp = require('mkdirp');
@@ -13,10 +14,10 @@ const DIR_PREFIX = './working'; // relative to project root when ran with yarn
 
 mkdirp(DIR_PREFIX);
 
-const IFFT_URL = process.env.IFFT_URL;
+const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK;
 const SUPPRESS_S3_UPLOAD = process.env.SUPPRESS_S3_UPLOAD;
 
-console.log('IFFT_URL:', IFFT_URL);
+console.log('SLACK_WEBHOOK:', SLACK_WEBHOOK);
 
 const s3 = new AWS.S3({ region: process.env.AWS_REGION });
 
@@ -46,6 +47,17 @@ function ensureDir(dest) {
   const fileDir = path.parse(dest).dir;
   return mkdirpPromised(fileDir);
 }
+
+module.exports.generateManifestID = function generateManifestID(manifest) {
+  const idString = `${manifest.version}|${manifest.mobileWorldContentPaths.en}`;
+
+  const id = crypto
+    .createHash('md5')
+    .update(idString)
+    .digest('hex');
+
+  return id;
+};
 
 module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
   const key = `${_key}`;
@@ -174,20 +186,44 @@ module.exports.mapPromiseAll = function mapPromiseAll(items, func) {
   return Promise.all(promises);
 };
 
-module.exports.notify = function notify(msg) {
+const COLOURS = {
+  green: '#36a64f',
+  red: '',
+};
+
+module.exports.notify = function notify(msg, colour) {
+  const slackPayload = {
+    username: 'destiny.plumbing',
+    channel: 'destiny-plumbing',
+    icon_url: 'https://i.imgur.com/obsiFKl.png',
+  };
+
+  if (colour) {
+    slackPayload.attachments = [
+      {
+        fallback: msg,
+        text: msg,
+        color: COLOURS[colour],
+      },
+    ];
+  } else {
+    slackPayload.text = msg;
+  }
+
   console.log(msg);
 
-  if (!IFFT_URL) {
-    console.log('[Not sending notification because IFFT_URL not defined]');
+  if (!SLACK_WEBHOOK) {
+    console.log(`** ${msg}`);
+    console.log(
+      ' ^^ Not sending notification because SLACK_WEBHOOK is not defined'
+    );
     return;
   }
 
-  fetch(IFFT_URL, {
+  fetch(SLACK_WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      value1: msg,
-    }),
+    body: JSON.stringify(slackPayload),
   });
 };
 

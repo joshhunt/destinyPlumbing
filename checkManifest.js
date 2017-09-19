@@ -1,11 +1,10 @@
 // This is the entry point to run on a schedule.
-const MANIFEST_URL = 'https://www.bungie.net/platform/Destiny2/Manifest/';
-const API_KEY = 'b661376f5d52484ea8a2f7d73407b96b';
+const { MANIFEST_URL, API_KEY } = require('./config.json');
 
 const fs = require('fs');
 const axios = require('axios');
 
-const { notify } = require('./utils');
+const { notify, generateManifestID } = require('./utils');
 const downloadAndProcess = require('./downloadAndProcess');
 
 const LAST_RUN_FILE = './lastrun.txt';
@@ -20,24 +19,25 @@ axios
     headers: { 'X-API-Key': API_KEY },
   })
   .then(resp => {
-    const id = `${resp.data.Response.version}|${resp.data.Response
-      .mobileWorldContentPaths.en}`;
-    console.log('This ID:', id);
+    thisId = generateManifestID(resp.data.Response);
+    console.log('This ID:', thisId);
 
-    if (id !== lastRun) {
-      notify(
-        'destiny.plumbing is updating in response to a change in the manifest.'
-      );
-      didRun = true;
-      fs.writeFileSync(LAST_RUN_FILE, id);
-      return downloadAndProcess();
+    if (thisId == lastRun) {
+      return Promise.resolve();
     }
 
-    return Promise.resolve();
+    notify(
+      'destiny.plumbing is updating in response to a change in the manifest.'
+    );
+    didRun = true;
+    return downloadAndProcess();
   })
   .then(() => {
     if (didRun) {
       notify('destiny.plumbing finished');
+      fs.writeFileSync(LAST_RUN_FILE, thisId);
+    } else {
+      console.log('No change in ID.');
     }
   })
   .catch(err => {

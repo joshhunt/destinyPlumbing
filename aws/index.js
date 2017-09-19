@@ -3,10 +3,9 @@ const AWS = require('aws-sdk');
 const axios = require('axios');
 const launchEc2Instance = require('./launchEc2Instance');
 
-const s3 = new AWS.S3();
+const { MANIFEST_URL, API_KEY } = require('./config.json');
 
-const MANIFEST_URL = 'https://www.bungie.net/platform/Destiny2/Manifest/';
-const API_KEY = 'b661376f5d52484ea8a2f7d73407b96b';
+const s3 = new AWS.S3();
 
 function getS3Item(key) {
   return new Promise((resolve, reject) => {

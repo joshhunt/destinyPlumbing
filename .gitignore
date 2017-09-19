@@ -6,3 +6,5 @@ check.sh
 .env
 deploy.env
 event.json
+runFromCron.sh
+config.json
