@@ -15,6 +15,9 @@ console.log('Prev ID:', lastRun);
 let didRun = false;
 let thisId;
 
+console.log('------------------------------');
+console.log(`Starting at ${new Date().toISOString()}`);
+
 axios
   .get(MANIFEST_URL, {
     headers: { 'X-API-Key': API_KEY },
@@ -40,11 +43,14 @@ axios
     } else {
       console.log('No change in ID.');
     }
+
+    console.log(`Finished at ${new Date().toISOString()}`);
   })
   .catch(err => {
     console.log('err');
     console.log(err);
     notify(`destiny.plumbing quit with an error ${err.message}`);
+    console.log(`Finished with error at ${new Date().toISOString()}`);
   });
 
 process.on('unhandledRejection', reason => {
