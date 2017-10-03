@@ -18,6 +18,7 @@ const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK;
 const SUPPRESS_S3_UPLOAD = process.env.SUPPRESS_S3_UPLOAD;
 
 console.log('SLACK_WEBHOOK:', SLACK_WEBHOOK);
+console.log('SUPPRESS_S3_UPLOAD:', SUPPRESS_S3_UPLOAD);
 
 const s3 = new AWS.S3({ region: process.env.AWS_REGION });
 
@@ -63,7 +64,7 @@ module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
   const key = `${_key}`;
 
   if (SUPPRESS_S3_UPLOAD) {
-    // console.log(`Not uploading ${key} to S3`);
+    console.log(`  Suppressing upload of ${key} to S3`);
     return Promise.resolve();
   }
 
