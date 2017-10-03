@@ -81,11 +81,11 @@ module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
 
     s3.putObject(params, (err, resp) => {
       if (err) {
-        console.log('ERROR uploading to s3', key);
+        console.log('. ERROR uploading to s3', key);
         console.log(err);
         reject(err);
       } else {
-        console.log('SUCCESS uploading to s3', key);
+        console.log('. SUCCESS uploading to s3', key);
         resolve(resp);
       }
     });
