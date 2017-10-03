@@ -80,7 +80,9 @@ module.exports.saveManifest = function saveManifest(extraData = {}) {
 
   process.env.WRITE_FILES && writeFile(filePath, fileBody);
 
-  return uploadToS3(s3Key, fileBody, {
+  const prom = uploadToS3(s3Key, fileBody, {
     ContentType: 'application/json',
   });
+
+  return prom;
 };
