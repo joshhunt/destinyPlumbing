@@ -4,6 +4,9 @@ const { MANIFEST_URL, API_KEY } = require('./config.json');
 const fs = require('fs');
 const axios = require('axios');
 
+console.log('------------------------------');
+console.log(`Starting at ${new Date().toISOString()}`);
+
 const { notify, generateManifestID } = require('./utils');
 const downloadAndProcess = require('./downloadAndProcess');
 
@@ -14,9 +17,6 @@ console.log('Prev ID:', lastRun);
 
 let didRun = false;
 let thisId;
-
-console.log('------------------------------');
-console.log(`Starting at ${new Date().toISOString()}`);
 
 axios
   .get(MANIFEST_URL, {
