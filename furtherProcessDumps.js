@@ -10,10 +10,27 @@ const RAW_DIR = PATH_PREFIX ? pathLib.join('./data', PATH_PREFIX) : './data';
 
 const LANGUAGE_CONCURRENCY = 4;
 
+const VALID_LANGS = [
+  'en',
+  'fr',
+  'es',
+  'de',
+  'it',
+  'ja',
+  'pt-br',
+  'es-mx',
+  'ru',
+  'pl',
+  'zh-cht',
+];
+
 module.exports = function furtherProcessDumps() {
   console.log('\n## Running additional processing tasks');
 
-  const langs = fs.readdirSync(RAW_DIR).filter(f => !f.includes('.json'));
+  const langs = fs
+    .readdirSync(RAW_DIR)
+    .filter(f => !f.includes('.json'))
+    .filter(lang => VALID_LANGS.includes(lang));
 
   return mapLimitPromise(langs, LANGUAGE_CONCURRENCY, lang => {
     console.log('## Processing', lang, 'further');
@@ -23,7 +40,8 @@ module.exports = function furtherProcessDumps() {
       // This must be first because others below will depend on it.
       'createItemDumps',
       // 'strikeDrops',
-      'raidDrops',
+      // 'raidDrops',
+      'diff',
     ];
 
     // Run each of the tasks sync

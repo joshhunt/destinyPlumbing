@@ -29,20 +29,26 @@ function getSqlFile(dumpPath, dumpLang) {
   ).then(zipFile => unzipFile('', zipFile));
 }
 
+const ITEM_URL =
+  'https://destiny.plumbing/en/raw/DestinyInventoryItemDefinition.json';
 let BUNGIE_MANIFEST;
 
 module.exports = () => {
-  return axios
-    .get(MANIFEST_URL, {
-      headers: { 'X-API-Key': API_KEY },
-    })
-    .then(resp => {
+  const promise = Promise.all([
+    axios.get(MANIFEST_URL, { headers: { 'X-API-Key': API_KEY } }),
+    axios.get(ITEM_URL),
+  ]);
+
+  return promise
+    .then(([resp, previousItemDefs]) => {
       // const languages = {
       //   en: resp.data.Response.mobileWorldContentPaths.en,
       // };
       const languages = resp.data.Response.mobileWorldContentPaths;
 
       BUNGIE_MANIFEST = resp.data.Response;
+      global.HACKY_MANIFEST_ID = generateManifestID(BUNGIE_MANIFEST);
+      global.HACKY_PREVIOUS_ITEM_DEFS = previousItemDefs.data;
 
       return mapPromiseAll(languages, (dumpPath, dumpLang) => {
         console.log('Downloading language', dumpLang);

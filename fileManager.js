@@ -7,25 +7,44 @@ const manifestStore = [];
 
 const PATH_PREFIX = process.env.PATH_PREFIX;
 
+if (!global.HACKY_THIS_ID) {
+  global.HACKY_THIS_ID = '123def';
+}
+
 function pathsFromArray(path) {
   const finalPath = PATH_PREFIX ? [PATH_PREFIX, ...path] : path;
 
   const filePath = pathLib.join('data', ...finalPath);
   const s3Key = finalPath.join('/');
+  const versionedS3Key = pathLib.join(
+    'versions',
+    global.HACKY_MANIFEST_ID,
+    ...finalPath
+  );
+  const versionedFilePath = pathLib.join(
+    'data',
+    'versions',
+    global.HACKY_MANIFEST_ID,
+    ...finalPath
+  );
 
   return {
     filePath,
     s3Key,
+    versionedS3Key,
+    versionedFilePath,
   };
 }
 
 function saveFileWorker(task, cb) {
   const { path, obj } = task;
 
-  const { filePath, s3Key } = pathsFromArray(path);
+  const { filePath, s3Key, versionedS3Key, versionedFilePath } = pathsFromArray(
+    path
+  );
 
   // pretty print significantly increases file size, so ensure gzip is used
-  const fileBody = JSON.stringify(obj, null, 2);
+  const fileBody = JSON.stringify(obj);
 
   manifestStore.push({ path, filePath, s3Key, obj });
 
@@ -34,10 +53,10 @@ function saveFileWorker(task, cb) {
 
   const promises = [
     uploadToS3(s3Key, fileBody, { ContentType: 'application/json' }),
+    uploadToS3(versionedS3Key, fileBody, { ContentType: 'application/json' }),
+    writeFile(filePath, fileBody),
+    writeFile(versionedFilePath, fileBody),
   ];
-
-  // only save file if we set the option to
-  process.env.WRITE_FILES && promises.push(writeFile(filePath, fileBody));
 
   return Promise.all(promises)
     .then(() => {
@@ -74,11 +93,18 @@ module.exports.collectManifest = function collectManifest() {
 module.exports.saveManifest = function saveManifest(extraData = {}) {
   const manifest = Object.assign(extraData, module.exports.collectManifest());
 
-  const { filePath, s3Key } = pathsFromArray(['index.json']);
+  const {
+    filePath,
+    s3Key,
+    versionedS3Key,
+    versionedFilePath,
+  } = pathsFromArray(['index.json']);
 
   const fileBody = JSON.stringify(manifest, null, 2);
 
-  process.env.WRITE_FILES && writeFile(filePath, fileBody);
+  writeFile(filePath, fileBody);
+  writeFile(versionedFilePath, fileBody);
+  uploadToS3(versionedS3Key, fileBody, { ContentType: 'application/json' });
 
   const prom = uploadToS3(s3Key, fileBody, {
     ContentType: 'application/json',
