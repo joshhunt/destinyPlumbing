@@ -37,10 +37,8 @@ module.exports = function furtherProcessDumps() {
     const pathPrefex = `${RAW_DIR}/${lang}`;
 
     const tasks = [
-      // This must be first because others below will depend on it.
+      // createItemDumps must be first because others below may depend on it.
       'createItemDumps',
-      // 'strikeDrops',
-      // 'raidDrops',
       'diff',
     ];
 
@@ -48,13 +46,16 @@ module.exports = function furtherProcessDumps() {
     return tasks.reduce((promise, taskName) => {
       return promise.then(() => {
         console.log('* Running task', taskName);
-        return require(`./tasks/${taskName}`)(pathPrefex, lang);
+        const taskPromise = require(`./tasks/${taskName}`)(pathPrefex, lang);
+
+        taskPromise.catch(err => {
+          console.error('Error with task', taskName);
+          console.error(err);
+        });
+
+        return taskPromise;
       });
     }, Promise.resolve());
-
-    // return Promise.resolve() // just a stylistic preference to get all tasks in line
-    //   .then(() => require('./tasks/createItemDumps')(pathPrefex, lang))
-    //   .then(() => require('./tasks/strikeDrops')(pathPrefex, lang));
   });
 };
 

@@ -22,6 +22,8 @@ console.log('SUPPRESS_S3_UPLOAD:', SUPPRESS_S3_UPLOAD);
 
 const s3 = new AWS.S3({ region: process.env.AWS_REGION });
 
+module.exports.s3 = s3;
+
 function resolveCb(resolve, reject) {
   return (err, result) => {
     if (err) {
@@ -58,6 +60,24 @@ module.exports.generateManifestID = function generateManifestID(manifest) {
     .digest('hex');
 
   return id;
+};
+
+module.exports.listS3 = function listS3(prefix, delimiter) {
+  const opts = {
+    Bucket: process.env.AWS_S3BUCKET,
+    Prefix: prefix,
+    Delimiter: delimiter,
+  };
+
+  return new Promise((resolve, reject) => {
+    s3.listObjectsV2(opts, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result.CommonPrefixes.map(obj => obj.Prefix));
+      }
+    });
+  });
 };
 
 module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
