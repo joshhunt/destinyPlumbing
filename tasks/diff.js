@@ -80,7 +80,7 @@ function getPreviousItems(defName, lang) {
         console.log(`${data.id} - ${data.lastUpdated}`);
       });
 
-      const prevIndex = sorted[1];
+      const prevIndex = sorted[2];
 
       const itemsUrl = `https://destiny.plumbing/versions/${prevIndex.id}/${lang}/raw/${defName}.json`;
 
