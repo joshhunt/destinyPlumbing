@@ -66,9 +66,11 @@ function createDiffs(defName, current, previous, lang) {
 function getPreviousItems(defName, lang) {
   return listS3('versions/', '/')
     .then(_keys => {
+      console.log('Keys from versions/', _keys);
       const keys = _keys.filter(k => {
         return !k.includes(global.HACKY_MANIFEST_ID);
       });
+      console.log('Keys from versions/ (after excluding current ID)', keys);
       return Promise.all(
         keys.map(k => axios.get(`https://destiny.plumbing/${k}index.json`))
       );
@@ -83,7 +85,7 @@ function getPreviousItems(defName, lang) {
         console.log(`${data.id} - ${data.lastUpdated}`);
       });
 
-      const prevIndex = sorted[2];
+      const prevIndex = sorted[0];
 
       const itemsUrl = `https://destiny.plumbing/versions/${prevIndex.id}/${lang}/raw/${defName}.json`;
 
