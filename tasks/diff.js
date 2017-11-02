@@ -31,7 +31,7 @@ function createDiffs(defName, current, previous, lang) {
   const friendlyDiff = {
     new: [],
     unclassified: [],
-    changed: [],
+    changed: []
   };
 
   forEach(current, item => {
@@ -59,13 +59,16 @@ function createDiffs(defName, current, previous, lang) {
       [lang, 'diff', defName, 'friendly.json'],
       friendlyDiff
     ),
-    fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff),
+    fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff)
   ]);
 }
 
 function getPreviousItems(defName, lang) {
   return listS3('versions/', '/')
-    .then(keys => {
+    .then(_keys => {
+      const keys = _keys.filter(k => {
+        return !k.includes(global.HACKY_MANIFEST_ID);
+      });
       return Promise.all(
         keys.map(k => axios.get(`https://destiny.plumbing/${k}index.json`))
       );
@@ -98,7 +101,7 @@ module.exports = function createItemDumps(pathPrefix, lang) {
 
   return Promise.all([
     openJSON(`${pathPrefix}/raw/${defName}.json`),
-    getPreviousItems(defName, lang),
+    getPreviousItems(defName, lang)
   ]).then(([current, previous]) =>
     createDiffs(defName, current, previous, lang)
   );
