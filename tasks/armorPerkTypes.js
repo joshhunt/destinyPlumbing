@@ -1,8 +1,7 @@
 const _ = require('lodash');
 
-const fileManager = require('../../fileManager');
-const { openJSON } = require('../../utils');
-const { getItem } = require('../commonUtils');
+const fileManager = require('../fileManager');
+const { openJSON } = require('../utils');
 
 const HASHES = [
   1242428023,
