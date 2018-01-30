@@ -1,0 +1,16 @@
+singleQuote: true
+parser: flow
+trailingComma: all
+overrides:
+  - files: "*.css"
+    options:
+      parser: css
+  - files: ".babelrc"
+    options:
+      parser: json
+  - files: "package*.json"
+    options:
+      parser: json
+  - files: "*.md"
+    options:
+      parser: markdown
