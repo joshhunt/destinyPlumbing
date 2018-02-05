@@ -19,7 +19,7 @@ function createDiffs(defName, current, previous, lang) {
     Object.keys(current).length,
     'current items, and',
     Object.keys(previous).length,
-    'previous items'
+    'previous items',
   );
 
   const bigDiff = chain(objectDiff.diff(previous, current).value)
@@ -31,7 +31,7 @@ function createDiffs(defName, current, previous, lang) {
   const friendlyDiff = {
     new: [],
     unclassified: [],
-    changed: []
+    changed: [],
   };
 
   forEach(current, item => {
@@ -57,22 +57,20 @@ function createDiffs(defName, current, previous, lang) {
   return Promise.resolve([
     fileManager.saveFile(
       [lang, 'diff', defName, 'friendly.json'],
-      friendlyDiff
+      friendlyDiff,
     ),
-    fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff)
+    fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff),
   ]);
 }
 
 function getPreviousItems(defName, lang) {
   return listS3('versions/', '/')
     .then(_keys => {
-      console.log('Keys from versions/', _keys);
       const keys = _keys.filter(k => {
         return !k.includes(global.HACKY_MANIFEST_ID);
       });
-      console.log('Keys from versions/ (after excluding current ID)', keys);
       return Promise.all(
-        keys.map(k => axios.get(`https://destiny.plumbing/${k}index.json`))
+        keys.map(k => axios.get(`https://destiny.plumbing/${k}index.json`)),
       );
     })
     .then(_allIndexes => {
@@ -87,7 +85,9 @@ function getPreviousItems(defName, lang) {
 
       const prevIndex = sorted[0];
 
-      const itemsUrl = `https://destiny.plumbing/versions/${prevIndex.id}/${lang}/raw/${defName}.json`;
+      const itemsUrl = `https://destiny.plumbing/versions/${
+        prevIndex.id
+      }/${lang}/raw/${defName}.json`;
 
       console.log('Fetching previous items for ID', prevIndex.id);
       return axios.get(itemsUrl).then(r => r.data);
@@ -103,8 +103,8 @@ module.exports = function createItemDumps(pathPrefix, lang) {
 
   return Promise.all([
     openJSON(`${pathPrefix}/raw/${defName}.json`),
-    getPreviousItems(defName, lang)
+    getPreviousItems(defName, lang),
   ]).then(([current, previous]) =>
-    createDiffs(defName, current, previous, lang)
+    createDiffs(defName, current, previous, lang),
   );
 };

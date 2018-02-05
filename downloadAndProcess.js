@@ -16,17 +16,16 @@ const furtherProcessDumps = require('./furtherProcessDumps');
 const fileManager = require('./fileManager');
 
 const { MANIFEST_URL, API_KEY } = require('./config.json');
+const { LANG } = process.env;
 
 const LANG_LIMIT = 2;
 
 function getSqlFile(dumpPath, dumpLang) {
   const dumpUrl = `https://www.bungie.net${dumpPath}`;
 
-  return downloadToFile(
-    changeExt(dumpPath, 'zip'),
-    dumpUrl,
-    dumpLang
-  ).then(zipFile => unzipFile('', zipFile));
+  return downloadToFile(changeExt(dumpPath, 'zip'), dumpUrl, dumpLang).then(
+    zipFile => unzipFile('', zipFile),
+  );
 }
 
 let BUNGIE_MANIFEST;
@@ -38,10 +37,15 @@ module.exports = () => {
 
   return promise
     .then(resp => {
-      // const languages = {
-      //   en: resp.data.Response.mobileWorldContentPaths.en,
-      // };
-      const languages = resp.data.Response.mobileWorldContentPaths;
+      let languages = resp.data.Response.mobileWorldContentPaths;
+
+      if (LANG) {
+        languages = {
+          [LANG]: languages[LANG],
+        };
+      }
+
+      console.log('Processing languages:', Object.keys(languages));
 
       BUNGIE_MANIFEST = resp.data.Response;
       global.HACKY_MANIFEST_ID = generateManifestID(BUNGIE_MANIFEST);

@@ -38,9 +38,10 @@ module.exports = function furtherProcessDumps() {
 
     const tasks = [
       // createItemDumps must be first because others below may depend on it.
-      'createItemDumps',
-      'armorPerkTypes',
-      'diff',
+      // 'createItemDumps',
+      // 'armorPerkTypes',
+      'reducedCollectableInventoryItems',
+      // 'diff',
     ];
 
     // Run each of the tasks sync
