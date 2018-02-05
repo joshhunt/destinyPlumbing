@@ -16,7 +16,7 @@ const furtherProcessDumps = require('./furtherProcessDumps');
 const fileManager = require('./fileManager');
 
 const { MANIFEST_URL, API_KEY } = require('./config.json');
-const { LANG } = process.env;
+const { SINGLE_LANG } = process.env;
 
 const LANG_LIMIT = 2;
 
@@ -39,9 +39,9 @@ module.exports = () => {
     .then(resp => {
       let languages = resp.data.Response.mobileWorldContentPaths;
 
-      if (LANG) {
+      if (SINGLE_LANG) {
         languages = {
-          [LANG]: languages[LANG],
+          [SINGLE_LANG]: languages[SINGLE_LANG],
         };
       }
 
