@@ -20,7 +20,9 @@ const ITEM_CATEGORY_HASHES = [
   54, // Sword
   55, // Mask
   57, // Aura
-  59, // Mods
+  39, // Ghost
+  1742617626, // Armour Ornaments
+  3124752623, // Weapon Ornaments
   // 52: Inventory
   // - 19: Emblems
   // - 41: Shaders
@@ -55,6 +57,16 @@ function processItems(allItems, lang) {
   const items = _(allItems)
     .toPairs()
     .filter(([itemHash, item]) => {
+      // Workaround for Legendary armour ornaments not have categories
+
+      if (
+        _.get(item, 'inventory.stackUniqueLabel', '').includes(
+          'plugs.armor.skins',
+        )
+      ) {
+        return true;
+      }
+
       const intersected = _.intersection(
         item.itemCategoryHashes,
         ITEM_CATEGORY_HASHES,
@@ -65,13 +77,10 @@ function processItems(allItems, lang) {
     })
     .map(([itemHash, item]) => {
       const payload = [itemHash, _.pick(item, ITEM_PROPERTIES)];
-      console.log(payload);
       return payload;
     })
     .fromPairs()
     .value();
-
-  console.log('saving:', items);
 
   return fileManager.saveFile(
     [lang, 'reducedCollectableInventoryItems.json'],
