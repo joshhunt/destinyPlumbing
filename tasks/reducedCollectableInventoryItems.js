@@ -23,17 +23,6 @@ const ITEM_CATEGORY_HASHES = [
   39, // Ghost
   1742617626, // Armour Ornaments
   3124752623, // Weapon Ornaments
-  // 52: Inventory
-  // - 19: Emblems
-  // - 41: Shaders
-  // - 42: Ships
-  // - 43: Sparrows
-  // - 18: Currencies
-  // - 40: Materials
-  // - 35: Consumables
-  // - 50: Subclasses
-  // - 56: Mods
-  // - 58: Clan Banner
 ];
 
 const ITEM_PROPERTIES = [
