@@ -40,6 +40,7 @@ const ITEM_PROPERTIES = [
   'inventory.tierTypeHash',
   'inventory.stackUniqueLabel',
   'plug.plugCategoryIdentifier',
+  'objectives',
 ];
 
 function processItems(allItems, lang) {
@@ -47,7 +48,6 @@ function processItems(allItems, lang) {
     .toPairs()
     .filter(([itemHash, item]) => {
       // Workaround for Legendary armour ornaments not have categories
-
       if (
         _.get(item, 'inventory.stackUniqueLabel', '').includes(
           'plugs.armor.skins',
