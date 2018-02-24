@@ -7,7 +7,6 @@ const { openJSON } = require('../utils');
 
 const ITEM_CATEGORY_HASHES = [
   1, // Weapon
-  18, // Currencies
   19, // Emblems
   20, // Armor
   34, // Engrams
@@ -19,10 +18,18 @@ const ITEM_CATEGORY_HASHES = [
   44, // Emotes
   54, // Sword
   55, // Mask
-  57, // Aura
   39, // Ghost
   1742617626, // Armour Ornaments
   3124752623, // Weapon Ornaments
+];
+
+const ITEM_BLACKLIST = [
+  1744115122, // Legend of Acrius quest item
+  460724140, // Jade Rabbit dupe
+  546372301, // Jade Rabbit dupe
+  2896466320, // Jade Rabbit dupe
+  2978016230, // Jade Rabbit dupe
+  3229272315, // Jade Rabbit dupe
 ];
 
 const ITEM_PROPERTIES = [
@@ -32,6 +39,7 @@ const ITEM_PROPERTIES = [
   'itemTypeDisplayName',
   'vendorIdentifier',
   'classType',
+  'stats.stats',
   'itemCategoryHashes',
   'displayProperties.name',
   'displayProperties.description',
@@ -41,20 +49,15 @@ const ITEM_PROPERTIES = [
   'inventory.stackUniqueLabel',
   'plug.plugCategoryIdentifier',
   'objectives',
-  'secondartScreenshot',
+  'secondaryIcon',
 ];
 
 function processItems(allItems, lang) {
   const items = _(allItems)
     .toPairs()
     .filter(([itemHash, item]) => {
-      // Workaround for Legendary armour ornaments not have categories
-      if (
-        _.get(item, 'inventory.stackUniqueLabel', '').includes(
-          'plugs.armor.skins',
-        )
-      ) {
-        return true;
+      if (ITEM_BLACKLIST.includes(item.hash)) {
+        return false;
       }
 
       const intersected = _.intersection(
