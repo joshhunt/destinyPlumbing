@@ -41,6 +41,7 @@ const ITEM_PROPERTIES = [
   'inventory.stackUniqueLabel',
   'plug.plugCategoryIdentifier',
   'objectives',
+  'secondartScreenshot',
 ];
 
 function processItems(allItems, lang) {
