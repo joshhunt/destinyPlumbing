@@ -48,6 +48,7 @@ const ITEM_PROPERTIES = [
   'inventory.tierTypeHash',
   'inventory.stackUniqueLabel',
   'plug.plugCategoryIdentifier',
+  'plug.previewItemOverrideHash',
   'objectives',
   'secondaryIcon',
 ];
