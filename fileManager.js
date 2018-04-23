@@ -19,13 +19,13 @@ function pathsFromArray(path) {
   const versionedS3Key = pathLib.join(
     'versions',
     global.HACKY_MANIFEST_ID,
-    ...finalPath
+    ...finalPath,
   );
   const versionedFilePath = pathLib.join(
     'data',
     'versions',
     global.HACKY_MANIFEST_ID,
-    ...finalPath
+    ...finalPath,
   );
 
   return {
@@ -40,7 +40,7 @@ function saveFileWorker(task, cb) {
   const { path, obj } = task;
 
   const { filePath, s3Key, versionedS3Key, versionedFilePath } = pathsFromArray(
-    path
+    path,
   );
 
   // pretty print significantly increases file size, so ensure gzip is used
@@ -66,7 +66,7 @@ function saveFileWorker(task, cb) {
     .catch(cb);
 }
 
-const fileUploadQueue = async.queue(saveFileWorker, 4);
+const fileUploadQueue = async.queue(saveFileWorker, 15);
 
 module.exports.saveFile = function saveFileQueuer(path, obj) {
   return new Promise((resolve, reject) => {
@@ -93,12 +93,9 @@ module.exports.collectManifest = function collectManifest() {
 module.exports.saveManifest = function saveManifest(extraData = {}) {
   const manifest = Object.assign(extraData, module.exports.collectManifest());
 
-  const {
-    filePath,
-    s3Key,
-    versionedS3Key,
-    versionedFilePath,
-  } = pathsFromArray(['index.json']);
+  const { filePath, s3Key, versionedS3Key, versionedFilePath } = pathsFromArray(
+    ['index.json'],
+  );
 
   const fileBody = JSON.stringify(manifest, null, 2);
 
