@@ -26,35 +26,49 @@ function queryDb(db, ...queryArgs) {
 function processTable(db, tableName, lang) {
   console.log('Processing', tableName);
 
-  return queryDb(db, `select * from ${tableName}`)
-    .then((rows) => {
-      const items = rows.reduce((acc, row, index) => {
-        const rowData = JSON.parse(row.json);
-        let rowID;
+  return queryDb(db, `select * from ${tableName}`).then(rows => {
+    const items = rows.reduce((acc, row, index) => {
+      const rowData = JSON.parse(row.json);
+      let rowID;
 
-        // TODO: DestinyGrimoireDefinition doesnt get sensisble IDs
-        if (_.has(row, 'id')) {
-          // convert from signed-32bit-as-Number to unsigned-32bit-as-Number
-          rowID = row.id >>> 0; // eslint-disable-line
-        } else if (_.has(row, 'key')) {
-          rowID = row.key;
-        } else {
-          die(row, `[${tableName}] item index ${index} does not have an .id or .key, but it does have ${Object.keys(row)}`);
-        }
+      // TODO: DestinyGrimoireDefinition doesnt get sensisble IDs
+      if (_.has(row, 'id')) {
+        // convert from signed-32bit-as-Number to unsigned-32bit-as-Number
+        rowID = row.id >>> 0; // eslint-disable-line
+      } else if (_.has(row, 'key')) {
+        rowID = row.key;
+      } else {
+        die(
+          row,
+          `[${tableName}] item index ${index} does not have an .id or .key, but it does have ${Object.keys(
+            row,
+          )}`,
+        );
+      }
 
-        if (!rowID && rowID !== 0) {
-          die(row, `[${tableName}] item ${row.id} (index ${index}) does not have a sensible ID`);
-        }
+      if (!rowID && rowID !== 0) {
+        die(
+          row,
+          `[${tableName}] item ${
+            row.id
+          } (index ${index}) does not have a sensible ID`,
+        );
+      }
 
-        if (acc[rowID]) {
-          die(row, `[${tableName}] item ${row.id} (index ${index}) appears to be duplicated`);
-        }
+      if (acc[rowID]) {
+        die(
+          row,
+          `[${tableName}] item ${
+            row.id
+          } (index ${index}) appears to be duplicated`,
+        );
+      }
 
-        return Object.assign({ [rowID]: rowData }, acc);
-      }, {});
+      return Object.assign({ [rowID]: rowData }, acc);
+    }, {});
 
-      return { tableName, items, lang };
-    });
+    return { tableName, items, lang };
+  });
 }
 
 function saveTable({ tableName, items, lang }) {
@@ -65,11 +79,11 @@ module.exports = function processDatabase(filePath, lang) {
   console.log('Opening database', filePath);
 
   return openDb(filePath)
-    .then((db) => {
+    .then(db => {
       console.log('Querying for all tables');
       return Promise.all([
         db,
-        queryDb(db, 'SELECT name FROM sqlite_master WHERE type=\'table\';'),
+        queryDb(db, "SELECT name FROM sqlite_master WHERE type='table';"),
       ]);
     })
     .then(([db, rows]) => {
@@ -118,9 +132,8 @@ module.exports = function processDatabase(filePath, lang) {
       console.log(`Found ${rows.length} tables. Extracting all the items`);
 
       return mapLimitPromise(rows, TABLES_LIMIT, ({ name }) => {
-        return processTable(db, name, lang)
-          .then(saveTable);
+        return processTable(db, name, lang).then(saveTable);
       });
     });
-    // .then(everything => saveAll(everything, lang));
+  // .then(everything => saveAll(everything, lang));
 };

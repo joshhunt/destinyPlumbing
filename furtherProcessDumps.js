@@ -37,7 +37,7 @@ module.exports = function furtherProcessDumps() {
     const pathPrefex = `${RAW_DIR}/${lang}`;
 
     const tasks = [
-      'armorPerkTypes',
+      // 'armorPerkTypes',
       'reducedCollectableInventoryItems',
       'reducedActivities',
       'diff',

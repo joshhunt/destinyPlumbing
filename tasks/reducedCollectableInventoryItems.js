@@ -33,24 +33,24 @@ const ITEM_BLACKLIST = [
 ];
 
 const ITEM_PROPERTIES = [
-  'hash',
-  'itemTypeName',
-  'screenshot',
-  'itemTypeDisplayName',
-  'vendorIdentifier',
+  'backgroundColor',
   'classType',
-  'stats.stats',
-  'itemCategoryHashes',
-  'displayProperties.name',
-  'displayProperties.description',
-  'displayProperties.icon',
-  'inventory.tierTypeName',
-  'inventory.tierTypeHash',
+  'displayProperties',
+  'emblemObjectiveHash',
+  'hash',
   'inventory.stackUniqueLabel',
+  'inventory.tierTypeHash',
+  'inventory.tierTypeName',
+  'itemCategoryHashes',
+  'itemTypeDisplayName',
+  'itemTypeName',
+  'objectives.objectiveHashes',
   'plug.plugCategoryIdentifier',
-  'plug.previewItemOverrideHash',
-  'objectives',
+  'screenshot',
   'secondaryIcon',
+  'stats.stats',
+  // 'stats.stats[].statHash',
+  // 'stats.stats[].value',
 ];
 
 function processItems(allItems, lang) {
