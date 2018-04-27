@@ -49,6 +49,7 @@ const ITEM_PROPERTIES = [
   'screenshot',
   'secondaryIcon',
   'stats.stats',
+  'loreHash',
   // 'stats.stats[].statHash',
   // 'stats.stats[].value',
 ];
