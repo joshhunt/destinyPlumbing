@@ -13,10 +13,11 @@ const downloadAndProcess = require('./downloadAndProcess');
 const CURRENTLY_RUNNING = 'currently running';
 const LAST_RUN_FILE = './lastrun.txt';
 
-const [lastRun, lastStatus] = fs
-  .readFileSync(LAST_RUN_FILE)
-  .toString()
-  .split('\n');
+const statusFile = fs.readFileSync(LAST_RUN_FILE).toString();
+
+console.log('Status file contents:', statusFile);
+
+const [lastRun, lastStatus] = statusFile.split('\n');
 
 console.log('Prev ID:', lastRun);
 console.log('lastStatus:', lastStatus);
@@ -24,7 +25,7 @@ console.log('lastStatus:', lastStatus);
 let didRun = false;
 let thisId;
 
-if (lastStatus.includes(CURRENTLY_RUNNING)) {
+if ((lastStatus || '').includes(CURRENTLY_RUNNING)) {
   console.log("It's currently running, skip!");
 } else {
   axios
