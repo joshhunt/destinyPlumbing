@@ -76,7 +76,7 @@ function processItems(allItems, lang) {
         return true;
       }
 
-      if (item.itemCategoryHashes.includes(EMBLEM)) {
+      if (item.itemCategoryHashes && item.itemCategoryHashes.includes(EMBLEM)) {
         const secondaryIcon = _.get(item, 'secondaryIcon');
         const secondaryOverlay = _.get(item, 'secondaryOverlay');
         const secondarySpecial = _.get(item, 'secondarySpecial');
