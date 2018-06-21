@@ -85,6 +85,15 @@ function processItems(allItems, lang) {
         return true;
       }
 
+      // Return Exotic Masterwork-related plug items
+      if (
+        item.plug &&
+        item.plug.plugCategoryIdentifier &&
+        item.plug.plugCategoryIdentifier.includes('masterwork')
+      ) {
+        return true;
+      }
+
       if (item.itemCategoryHashes && item.itemCategoryHashes.includes(EMBLEM)) {
         const secondaryIcon = _.get(item, 'secondaryIcon', '');
         const secondaryOverlay = _.get(item, 'secondaryOverlay', '');
