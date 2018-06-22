@@ -57,6 +57,7 @@ const ITEM_PROPERTIES = [
   'objectives.objectiveHashes',
   'plug.plugCategoryIdentifier',
   'plug.uiPlugLabel',
+  'plug.insertionRules',
   'screenshot',
   'secondaryIcon',
   'stats.stats',
