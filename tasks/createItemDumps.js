@@ -34,7 +34,7 @@ function processItems(inventoryItems, lang) {
 
       return [hash, item];
     })
-    .groupBy((arg) => {
+    .groupBy(arg => {
       const item = arg[1];
       const type = definitions.itemType[item.itemType.toString()];
       return type;
@@ -56,6 +56,7 @@ function processItems(inventoryItems, lang) {
 }
 
 module.exports = function createItemDumps(pathPrefix, lang) {
-  return openJSON(`${pathPrefix}/raw/DestinyInventoryItemDefinition.json`)
-    .then(items => processItems(items, lang));
+  return openJSON(`${pathPrefix}/raw/DestinyInventoryItemDefinition.json`).then(
+    items => processItems(items, lang),
+  );
 };

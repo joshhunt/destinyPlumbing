@@ -17,19 +17,20 @@
   },
   "homepage": "https://github.com/joshhunt/destinyPlumbing#readme",
   "dependencies": {
-    "async": "^2.1.4",
-    "aws-sdk": "^2.7.21",
-    "axios": "^0.15.3",
+    "async": "2.6.1",
+    "aws-sdk": "2.270.1",
+    "axios": "0.18.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.5.0",
     "isomorphic-fetch": "^2.2.1",
-    "lodash": "^4.17.4",
+    "lodash": "4.17.10",
     "mkdirp": "^0.5.1",
     "multimeter": "^0.1.1",
     "objectdiff": "^1.1.0",
     "prettier": "^1.10.2",
-    "sqlite3": "^3.1.13",
-    "unzip": "^0.1.11"
+    "sqlite3": "4.0.1",
+    "unzip": "^0.1.11",
+    "unzipper": "^0.9.1"
   },
   "devDependencies": {
     "babel-eslint": "^7.1.1",

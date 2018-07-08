@@ -35,52 +35,54 @@ module.exports = () => {
     headers: { 'X-API-Key': API_KEY },
   });
 
-  return promise
-    .then(resp => {
-      let languages = resp.data.Response.mobileWorldContentPaths;
+  return (
+    promise
+      .then(resp => {
+        let languages = resp.data.Response.mobileWorldContentPaths;
 
-      if (SINGLE_LANG) {
-        languages = {
-          [SINGLE_LANG]: languages[SINGLE_LANG],
-        };
-      }
+        if (SINGLE_LANG) {
+          languages = {
+            [SINGLE_LANG]: languages[SINGLE_LANG],
+          };
+        }
 
-      console.log('Processing languages:', Object.keys(languages));
+        console.log('Processing languages:', Object.keys(languages));
 
-      BUNGIE_MANIFEST = resp.data.Response;
-      global.HACKY_MANIFEST_ID = generateManifestID(BUNGIE_MANIFEST);
+        BUNGIE_MANIFEST = resp.data.Response;
+        global.HACKY_MANIFEST_ID = generateManifestID(BUNGIE_MANIFEST);
 
-      return mapPromiseAll(languages, (dumpPath, dumpLang) => {
-        console.log('Downloading language', dumpLang);
+        return mapPromiseAll(languages, (dumpPath, dumpLang) => {
+          console.log('Downloading language', dumpLang);
 
-        // Download and extract the sqlite database
-        return alsoResolveWith(getSqlFile(dumpPath, dumpLang), dumpLang);
-      });
-    })
-    .then(results => {
-      return mapLimitPromise(results, LANG_LIMIT, ([sqlFile, lang]) => {
-        console.log('Dumping', lang);
+          // Download and extract the sqlite database
+          return alsoResolveWith(getSqlFile(dumpPath, dumpLang), dumpLang);
+        });
+      })
+      // .then(results => {
+      //   return mapLimitPromise(results, LANG_LIMIT, ([sqlFile, lang]) => {
+      //     console.log('Dumping', lang);
 
-        return processDatabase(sqlFile, lang);
-      });
-    })
-    .then(() => {
-      console.log('');
-      console.log('### Further processing dumps');
-      return furtherProcessDumps();
-    })
-    .then(() => {
-      console.log('');
-      console.log('### Saving manifest.');
+      //     return processDatabase(sqlFile, lang);
+      //   });
+      // })
+      .then(() => {
+        console.log('');
+        console.log('### Further processing dumps');
+        return furtherProcessDumps();
+      })
+      .then(() => {
+        console.log('');
+        console.log('### Saving manifest.');
 
-      const id = generateManifestID(BUNGIE_MANIFEST);
+        const id = generateManifestID(BUNGIE_MANIFEST);
 
-      return fileManager.saveManifest({
-        id,
-        lastUpdated: new Date(),
-        bungieManifestVersion: BUNGIE_MANIFEST.version,
-      });
-    });
+        return fileManager.saveManifest({
+          id,
+          lastUpdated: new Date(),
+          bungieManifestVersion: BUNGIE_MANIFEST.version,
+        });
+      })
+  );
 };
 
 // Run this module if called directly with node furtherProcessDumps

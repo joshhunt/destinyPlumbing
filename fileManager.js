@@ -44,7 +44,7 @@ function saveFileWorker(task, cb) {
   );
 
   // pretty print significantly increases file size, so ensure gzip is used
-  const fileBody = JSON.stringify(obj);
+  const fileBody = _.isString(obj) ? obj : JSON.stringify(obj);
 
   manifestStore.push({ path, filePath, s3Key, obj });
 

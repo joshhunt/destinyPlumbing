@@ -36,7 +36,7 @@ if ((lastStatus || '').includes(CURRENTLY_RUNNING)) {
       thisId = generateManifestID(resp.data.Response);
       console.log('This ID:', thisId);
 
-      if (thisId == lastRun) {
+      if (!process.env.FORCE && thisId == lastRun) {
         return Promise.resolve();
       }
 

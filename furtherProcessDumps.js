@@ -38,8 +38,8 @@ module.exports = function furtherProcessDumps() {
 
     const tasks = [
       // 'armorPerkTypes',
-      'reducedCollectableInventoryItems',
-      'reducedActivities',
+      // 'reducedCollectableInventoryItems',
+      // 'reducedActivities',
       'diff',
     ];
 
