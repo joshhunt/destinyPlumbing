@@ -26,7 +26,9 @@ const ITEM_CATEGORY_HASHES = [
   3124752623, // Weapon Ornaments
 ];
 
-const ITEM_WHITELIST = [];
+const ITEM_WHITELIST = [
+  1311389413, // Worm God Incarnation
+];
 
 const ITEM_BLACKLIST = [
   1744115122, // Legend of Acrius quest item
