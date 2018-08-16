@@ -28,6 +28,21 @@ const ITEM_CATEGORY_HASHES = [
 
 const ITEM_WHITELIST = [
   1311389413, // Worm God Incarnation
+  463166592, // Arcing Arms Glow
+  3507818312, // Arcing Chest Glow
+  1339405989, // Arcing Class Item Glow
+  3054638345, // Arcing Helmet Glow
+  3835954362, // Arcing Leg Glow
+  873770815, // Sunlit Arms Glow
+  3367964921, // Sunlit Chest Glow
+  811724212, // Sunlit Class Item Glow
+  4143534670, // Sunlit Helmet Glow
+  4089988225, // Sunlit Leg Glow
+  2699000684, // Void-Tinged Arms Glow
+  1702504372, // Void-Tinged Chest Glow
+  2912265353, // Void-Tinged Class Item Glow
+  4236468733, // Void-Tinged Helmet Glow
+  3344732822, // Void-Tinged Leg Glow
 ];
 
 const ITEM_BLACKLIST = [
