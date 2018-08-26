@@ -63,6 +63,12 @@ if ((lastStatus || '').includes(CURRENTLY_RUNNING)) {
       console.log(err);
       notify(`destiny.plumbing quit with an error ${err.message}`);
       console.log(`Finished with error at ${new Date().toISOString()}`);
+
+      fs.writeFileSync(LAST_RUN_FILE, lastRun);
+
+      setTimeout(() => {
+        process.exit(1);
+      }, 10 * 100);
     });
 }
 
