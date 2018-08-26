@@ -96,7 +96,7 @@ module.exports.uploadToS3 = function uploadToS3(_key, body, extraArgs) {
         Body: body,
         ACL: 'public-read',
       },
-      extraArgs || {}
+      extraArgs || {},
     );
 
     s3.putObject(params, (err, resp) => {
@@ -140,7 +140,7 @@ function downloadToFile(destPath, url) {
       file.on('finish', () =>
         file.close(() => {
           resolve(destPath);
-        })
+        }),
       );
     });
 
@@ -187,7 +187,7 @@ module.exports.unzipFile = function cacheableUnzipFile(dest, orig) {
   const destPath = path.join(DIR_PREFIX, dest);
   const outputFile = path.join(
     DIR_PREFIX,
-    module.exports.changeExt(orig, 'content')
+    module.exports.changeExt(orig, 'content'),
   );
 
   return unzipFile(destPath, orig).then(() => outputFile);
@@ -236,7 +236,7 @@ module.exports.notify = function notify(msg, colour) {
   if (!SLACK_WEBHOOK) {
     console.log(`** ${msg}`);
     console.log(
-      ' ^^ Not sending notification because SLACK_WEBHOOK is not defined'
+      ' ^^ Not sending notification because SLACK_WEBHOOK is not defined',
     );
     return;
   }
@@ -268,7 +268,7 @@ module.exports.mapLimitPromise = function mapLimitPromise(items, limit, func) {
           .then(result => cb(null, result))
           .catch(cb);
       },
-      resolveCb(resolve, reject)
+      resolveCb(resolve, reject),
     );
   });
 };

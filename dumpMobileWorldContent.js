@@ -87,48 +87,6 @@ module.exports = function processDatabase(filePath, lang) {
       ]);
     })
     .then(([db, rows]) => {
-      // rows = [
-      //   { name: 'DestinyActivityDefinition' },
-      //   // { name: 'DestinyActivityTypeDefinition' },
-      //   { name: 'DestinyClassDefinition' },
-      //   // { name: 'DestinyGenderDefinition' },
-      //   { name: 'DestinyInventoryBucketDefinition' },
-      //   { name: 'DestinyInventoryItemDefinition' },
-      //   // { name: 'DestinyProgressionDefinition' },
-      //   // { name: 'DestinyRaceDefinition' },
-      //   // { name: 'DestinyTalentGridDefinition' },
-      //   // { name: 'DestinyUnlockFlagDefinition' },
-      //   // { name: 'DestinyVendorDefinition' },
-      //   // { name: 'DestinyHistoricalStatsDefinition' },
-      //   // { name: 'DestinyDirectorBookDefinition' },
-      //   // { name: 'DestinyStatDefinition' },
-      //   // { name: 'DestinySandboxPerkDefinition' },
-      //   // { name: 'DestinyDestinationDefinition' },
-      //   // { name: 'DestinyPlaceDefinition' },
-      //   // { name: 'DestinyActivityBundleDefinition' },
-      //   // { name: 'DestinyStatGroupDefinition' },
-      //   // { name: 'DestinySpecialEventDefinition' },
-      //   { name: 'DestinyFactionDefinition' },
-      //   // { name: 'DestinyVendorCategoryDefinition' },
-      //   // { name: 'DestinyEnemyRaceDefinition' },
-      //   // { name: 'DestinyScriptedSkullDefinition' },
-      //   // { name: 'DestinyTriumphSetDefinition' },
-      //   // { name: 'DestinyItemCategoryDefinition' },
-      //   // { name: 'DestinyRewardSourceDefinition' },
-      //   // { name: 'DestinyObjectiveDefinition' },
-      //   // { name: 'DestinyDamageTypeDefinition' },
-      //   // { name: 'DestinyCombatantDefinition' },
-      //   // { name: 'DestinyActivityCategoryDefinition' },
-      //   // { name: 'DestinyRecordDefinition' },
-      //   // { name: 'DestinyRecordBookDefinition' },
-      //   // { name: 'DestinyActivityModeDefinition' },
-      //   // { name: 'DestinyMedalTierDefinition' },
-      //   // { name: 'DestinyBondDefinition' },
-      //   // { name: 'DestinyLocationDefinition' },
-      //   // { name: 'DestinyGrimoireDefinition' },
-      //   // { name: 'DestinyGrimoireCardDefinition' },
-      // ];
-
       console.log(`Found ${rows.length} tables. Extracting all the items`);
 
       return mapLimitPromise(rows, TABLES_LIMIT, ({ name }) => {

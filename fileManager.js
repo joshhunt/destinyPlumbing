@@ -63,7 +63,22 @@ function saveFileWorker(task, cb) {
       console.log(id, 'successfully saved');
       cb();
     })
-    .catch(cb);
+    .catch(err => {
+      console.error(err);
+
+      const failedCount = (task.failedCount || 0) + 1;
+
+      if (failedCount < 10) {
+        console.error('Error uploading file to S3, going to retry');
+        fileUploadQueue.push({
+          ...task,
+          failedCount,
+        });
+      } else {
+        console.error('Error uploading file to S3 too many times, aborting');
+        cb(new Error('Error uploading file to S3 too many times, aborting'));
+      }
+    });
 }
 
 const fileUploadQueue = async.queue(saveFileWorker, 15);

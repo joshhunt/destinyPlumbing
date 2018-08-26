@@ -37,14 +37,16 @@ module.exports = function strikeDrops(pathPrefix, lang) {
 
         if (!baseActivity) {
           console.log(
-            `Could not find activity for ${dropList.id}:${dropList.activityHash}`
+            `Could not find activity for ${dropList.id}:${
+              dropList.activityHash
+            }`,
           );
           return null;
         }
 
         const matchingActivities = _.values(activities)
           .filter(
-            activity => activity.activityName === baseActivity.activityName
+            activity => activity.activityName === baseActivity.activityName,
           )
           .map(activity => activity.activityHash);
 
@@ -66,7 +68,7 @@ module.exports = function strikeDrops(pathPrefix, lang) {
     const strikeItemHashes = dropLists
       .reduce((acc, dropList) => {
         const newItems = dropList.items.filter(
-          itemHash => !acc.includes(itemHash)
+          itemHash => !acc.includes(itemHash),
         );
 
         return acc.concat(newItems);
@@ -85,7 +87,7 @@ module.exports = function strikeDrops(pathPrefix, lang) {
 
     return fileManager.saveFile(
       [lang, 'collections', 'combinedStrikeDrops.json'],
-      data
+      data,
     );
   });
 };

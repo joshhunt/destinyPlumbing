@@ -41,7 +41,9 @@ module.exports.getItem = function getItem(itemDefs, itemHash) {
   const className = definitions.classType[item.classType];
 
   if (className && !refinedItem.itemTypeDisplayName.includes(className)) {
-    refinedItem.itemTypeDisplayName = `${className} ${refinedItem.itemTypeDisplayName}`;
+    refinedItem.itemTypeDisplayName = `${className} ${
+      refinedItem.itemTypeDisplayName
+    }`;
   }
 
   return refinedItem;

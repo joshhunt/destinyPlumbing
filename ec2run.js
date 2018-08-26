@@ -18,7 +18,7 @@ process.on('unhandledRejection', function(reason, p) {
     'Possibly Unhandled Rejection at: Promise ',
     p,
     ' reason: ',
-    reason
+    reason,
   );
   console.log(reason);
   console.log(p);

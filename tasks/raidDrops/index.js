@@ -40,7 +40,7 @@ module.exports = function strikeDrops(pathPrefix, lang) {
 
       if (!raid) {
         console.log(
-          `Could not find activity for ${dropList.id}:${dropList.activityHash}`
+          `Could not find activity for ${dropList.id}:${dropList.activityHash}`,
         );
         return acc;
       }
@@ -72,7 +72,7 @@ module.exports = function strikeDrops(pathPrefix, lang) {
 
     return fileManager.saveFile(
       [lang, 'collections', 'combinedRaidDrops.json'],
-      data
+      data,
     );
   });
 };

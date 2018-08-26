@@ -36,8 +36,9 @@ function getBungieManifestVersion() {
       headers: { 'X-API-Key': API_KEY },
     })
     .then(function(body) {
-      return `${body
-        .data.Response.version}|${body.data.Response.mobileWorldContentPaths.en}`;
+      return `${
+        body.data.Response.version
+      }|${body.data.Response.mobileWorldContentPaths.en}`;
     });
 }
 
