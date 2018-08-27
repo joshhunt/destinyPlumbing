@@ -4,7 +4,7 @@ const pathLib = require('path');
 const { mapLimitPromise } = require('./utils');
 const fileManager = require('./fileManager');
 
-const PATH_PREFIX = process.env.PATH_PREFIX;
+const { PATH_PREFIX, SINGLE_LANG } = process.env;
 
 const RAW_DIR = PATH_PREFIX ? pathLib.join('./data', PATH_PREFIX) : './data';
 
@@ -22,7 +22,12 @@ const VALID_LANGS = [
   'ru',
   'pl',
   'zh-cht',
-];
+].filter(lang => {
+  if (SINGLE_LANG) {
+    return SINGLE_LANG === lang;
+  }
+  return true;
+});
 
 module.exports = function furtherProcessDumps() {
   console.log('\n## Running additional processing tasks');

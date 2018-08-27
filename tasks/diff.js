@@ -1,11 +1,15 @@
 const objectDiff = require('objectdiff');
+const _ = require('lodash');
 const { chain, forEach, sortBy, isEqual } = require('lodash');
 const axios = require('axios');
 
 const fileManager = require('../fileManager');
-const { openJSON, listS3 } = require('../utils');
+const { openJSON, listS3, mapPromiseAll } = require('../utils');
+const diffHtmlTemplate = require('./diffHtmlTemplate');
 
-function createDiffs(defName, current, previous, lang) {
+const { FORCE_PREVIOUS_ID } = process.env;
+
+function createDiffs(defName, current, previous, lang, defs) {
   if (!current) {
     throw new Error('Current items is undefined');
   }
@@ -22,13 +26,7 @@ function createDiffs(defName, current, previous, lang) {
     'previous items',
   );
 
-  const bigDiff = chain(objectDiff.diff(previous, current).value)
-    .toPairs()
-    .filter(arr => arr[1].changed !== 'equal')
-    .fromPairs()
-    .value();
-
-  const friendlyDiff = {
+  const templateDiffData = {
     new: [],
     unclassified: [],
     changed: [],
@@ -37,21 +35,38 @@ function createDiffs(defName, current, previous, lang) {
   forEach(current, item => {
     const prevItem = previous[item.hash];
     if (!prevItem) {
-      console.log('NEW:', item.hash, item.displayProperties.name);
-      friendlyDiff.new.push(item.hash);
+      templateDiffData.new.push(item);
     } else if (
       prevItem.redacted &&
       !item.redacted &&
       item.displayProperties.name
     ) {
-      console.log('UNCLASSIFIED:', item.hash, item.displayProperties.name);
-      friendlyDiff.unclassified.push(item.hash);
+      templateDiffData.unclassified.push(item);
     } else if (!isEqual(item, prevItem)) {
-      // console.log('CHANGED:', item.hash, item.displayProperties.name);
-      friendlyDiff.changed.push(item.hash);
+      templateDiffData.changed.push(item);
     } else {
-      // console.log('NO CHANGE:', item.hash, item.displayProperties.name);
     }
+  });
+
+  const sorter = item =>
+    item.itemCategoryHashes ? item.itemCategoryHashes.join(',') : 0;
+
+  templateDiffData.new = _.sortBy(templateDiffData.new, sorter);
+  templateDiffData.unclassified = _.sortBy(
+    templateDiffData.unclassified,
+    sorter,
+  );
+  templateDiffData.changed = _.sortBy(templateDiffData.changed, sorter);
+
+  const friendlyDiff = {
+    new: templateDiffData.new.map(item => item.hash),
+    unclassified: templateDiffData.unclassified.map(item => item.hash),
+    changed: templateDiffData.changed.map(item => item.hash),
+  };
+
+  const htmlPage = diffHtmlTemplate(defName, templateDiffData, {
+    ...defs,
+    itemDefs: current,
   });
 
   return Promise.resolve([
@@ -59,11 +74,24 @@ function createDiffs(defName, current, previous, lang) {
       [lang, 'diff', defName, 'friendly.json'],
       friendlyDiff,
     ),
-    fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff),
+    // fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff),
+    fileManager.saveFile([lang, 'diff', defName, 'diff.html'], htmlPage, {
+      raw: true,
+    }),
   ]);
 }
 
-function getPreviousItems(defName, lang) {
+function getPreviousDef(defName, lang, previousId) {
+  const itemsUrl = `https://destiny.plumbing/versions/${previousId}/${lang}/raw/${defName}.json`;
+  console.log(`Fetching previous def ${defName} for ID`, previousId);
+  return axios.get(itemsUrl).then(r => r.data);
+}
+
+function getPreviousId() {
+  if (FORCE_PREVIOUS_ID) {
+    return Promise.resolve(FORCE_PREVIOUS_ID);
+  }
+
   return listS3('versions/', '/')
     .then(_keys => {
       const keys = _keys.filter(k => {
@@ -79,19 +107,74 @@ function getPreviousItems(defName, lang) {
         return new Date(index.lastUpdated);
       }).reverse();
 
-      sorted.forEach(data => {
-        console.log(`${data.id} - ${data.lastUpdated}`);
+      const history = sorted.map(data => {
+        return {
+          id: data.id,
+          lastUpdated: data.lastUpdated,
+          bungieManifestVersion: data.bungieManifestVersion,
+        };
       });
 
+      fileManager.saveFile(['history.json'], history);
+
       const prevIndex = sorted[0];
-
-      const itemsUrl = `https://destiny.plumbing/versions/${
-        prevIndex.id
-      }/${lang}/raw/${defName}.json`;
-
-      console.log('Fetching previous items for ID', prevIndex.id);
-      return axios.get(itemsUrl).then(r => r.data);
+      return prevIndex.id;
     });
+}
+
+const DEFINITIONS = [
+  // 'DestinyActivityDefinition',
+  // 'DestinyActivityModeDefinition',
+  'DestinyInventoryItemDefinition',
+
+  // 'DestinyAchievementDefinition',
+  // 'DestinyActivityGraphDefinition',
+  // 'DestinyActivityModifierDefinition',
+  // 'DestinyActivityTypeDefinition',
+  // 'DestinyBondDefinition',
+  // 'DestinyChecklistDefinition',
+  // 'DestinyClassDefinition',
+  // 'DestinyDamageTypeDefinition',
+  // 'DestinyDestinationDefinition',
+  // 'DestinyEnemyRaceDefinition',
+  // 'DestinyEquipmentSlotDefinition',
+  // 'DestinyFactionDefinition',
+  // 'DestinyGenderDefinition',
+  // 'DestinyHistoricalStatsDefinition',
+  // 'DestinyInventoryBucketDefinition',
+  // 'DestinyItemCategoryDefinition',
+  // 'DestinyItemTierTypeDefinition',
+  // 'DestinyLocationDefinition',
+  // 'DestinyLoreDefinition',
+  // 'DestinyMaterialRequirementSetDefinition',
+  // 'DestinyMedalTierDefinition',
+  // 'DestinyMilestoneDefinition',
+  // 'DestinyObjectiveDefinition',
+  // 'DestinyPlaceDefinition',
+  // 'DestinyPlugSetDefinition',
+  // 'DestinyProgressionDefinition',
+  // 'DestinyProgressionLevelRequirementDefinition',
+  // 'DestinyRaceDefinition',
+  // 'DestinyReportReasonCategoryDefinition',
+  // 'DestinySackRewardItemListDefinition',
+  // 'DestinySandboxPerkDefinition',
+  // 'DestinySocketCategoryDefinition',
+  // 'DestinySocketTypeDefinition',
+  // 'DestinyStatDefinition',
+  // 'DestinyStatGroupDefinition',
+  // 'DestinyTalentGridDefinition',
+  // 'DestinyUnlockDefinition',
+  // 'DestinyVendorDefinition',
+  // 'DestinyVendorGroupDefinition',
+];
+
+function diffDefinition(pathPrefix, definitionName, lang, previousId, defs) {
+  return Promise.all([
+    openJSON(`${pathPrefix}/raw/${definitionName}.json`),
+    getPreviousDef(definitionName, lang, previousId),
+  ]).then(([current, previous]) => {
+    return createDiffs(definitionName, current, previous, lang, defs);
+  });
 }
 
 module.exports = function createItemDumps(pathPrefix, lang) {
@@ -99,12 +182,27 @@ module.exports = function createItemDumps(pathPrefix, lang) {
     return Promise.resolve();
   }
 
-  const defName = 'DestinyInventoryItemDefinition';
-
   return Promise.all([
-    openJSON(`${pathPrefix}/raw/${defName}.json`),
-    getPreviousItems(defName, lang),
-  ]).then(([current, previous]) =>
-    createDiffs(defName, current, previous, lang),
-  );
+    getPreviousId(),
+    openJSON(`${pathPrefix}/raw/DestinyItemCategoryDefinition.json`),
+    openJSON(`${pathPrefix}/raw/DestinyDamageTypeDefinition.json`),
+    openJSON(`${pathPrefix}/raw/DestinyInventoryBucketDefinition.json`),
+  ]).then(([previousId, itemCategory, damageType, bucket]) => {
+    return mapPromiseAll(DEFINITIONS, definitionName => {
+      return diffDefinition(pathPrefix, definitionName, lang, previousId, {
+        itemCategory,
+        damageType,
+        bucket,
+      });
+    });
+  });
+
+  // const defName = 'DestinyInventoryItemDefinition';
+
+  // return Promise.all([
+  //   openJSON(`${pathPrefix}/raw/${defName}.json`),
+  //   getPreviousItems(defName, lang),
+  // ]).then(([current, previous]) =>
+  //   createDiffs(defName, current, previous, lang),
+  // );
 };

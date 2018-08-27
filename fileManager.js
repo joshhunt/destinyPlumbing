@@ -37,14 +37,13 @@ function pathsFromArray(path) {
 }
 
 function saveFileWorker(task, cb) {
-  const { path, obj } = task;
+  const { path, obj, raw } = task;
 
   const { filePath, s3Key, versionedS3Key, versionedFilePath } = pathsFromArray(
     path,
   );
 
-  // pretty print significantly increases file size, so ensure gzip is used
-  const fileBody = JSON.stringify(obj);
+  const fileBody = raw ? obj : JSON.stringify(obj);
 
   manifestStore.push({ path, filePath, s3Key, obj });
 
@@ -83,9 +82,9 @@ function saveFileWorker(task, cb) {
 
 const fileUploadQueue = async.queue(saveFileWorker, 15);
 
-module.exports.saveFile = function saveFileQueuer(path, obj) {
+module.exports.saveFile = function saveFileQueuer(path, obj, extra = {}) {
   return new Promise((resolve, reject) => {
-    fileUploadQueue.push({ path, obj }, resolveCb(resolve, reject));
+    fileUploadQueue.push({ path, obj, ...extra }, resolveCb(resolve, reject));
   });
 };
 

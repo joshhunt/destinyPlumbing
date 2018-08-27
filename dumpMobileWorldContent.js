@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const _ = require('lodash');
 
 const fileManager = require('./fileManager');
-const { resolveCb, mapLimitPromise } = require('./utils');
+const { resolveCb, mapPromiseAll } = require('./utils');
 
 const TABLES_LIMIT = 4;
 
@@ -28,43 +28,14 @@ function processTable(db, tableName, lang) {
 
   return queryDb(db, `select * from ${tableName}`).then(rows => {
     const items = rows.reduce((acc, row, index) => {
-      const rowData = JSON.parse(row.json);
-      let rowID;
+      const obj = JSON.parse(row.json);
+      const baseKey = row.id || row.key;
+      const intKey = parseInt(baseKey);
+      const key = isNaN(intKey) ? baseKey : intKey >>> 0;
 
-      // TODO: DestinyGrimoireDefinition doesnt get sensisble IDs
-      if (_.has(row, 'id')) {
-        // convert from signed-32bit-as-Number to unsigned-32bit-as-Number
-        rowID = row.id >>> 0; // eslint-disable-line
-      } else if (_.has(row, 'key')) {
-        rowID = row.key;
-      } else {
-        die(
-          row,
-          `[${tableName}] item index ${index} does not have an .id or .key, but it does have ${Object.keys(
-            row,
-          )}`,
-        );
-      }
+      acc[obj.hash || key] = obj;
 
-      if (!rowID && rowID !== 0) {
-        die(
-          row,
-          `[${tableName}] item ${
-            row.id
-          } (index ${index}) does not have a sensible ID`,
-        );
-      }
-
-      if (acc[rowID]) {
-        die(
-          row,
-          `[${tableName}] item ${
-            row.id
-          } (index ${index}) appears to be duplicated`,
-        );
-      }
-
-      return Object.assign({ [rowID]: rowData }, acc);
+      return acc;
     }, {});
 
     return { tableName, items, lang };
@@ -89,7 +60,7 @@ module.exports = function processDatabase(filePath, lang) {
     .then(([db, rows]) => {
       console.log(`Found ${rows.length} tables. Extracting all the items`);
 
-      return mapLimitPromise(rows, TABLES_LIMIT, ({ name }) => {
+      return mapPromiseAll(rows, ({ name }) => {
         return processTable(db, name, lang).then(saveTable);
       });
     });
