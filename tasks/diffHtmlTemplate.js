@@ -4,10 +4,6 @@ const _ = require('lodash');
 const WEAPON = 1;
 const ARMOR = 20;
 
-const KINETIC_WEAPON = 2;
-const ENERGY_WEAPON = 3;
-const POWER_WEAPON = 4;
-
 const EXOTIC = 2759499571;
 const LEGENDARY = 4008398120;
 const RARE = 2127292149;
@@ -22,21 +18,13 @@ function hasCategoryHash(item, categoryHash) {
 
 function getWeaponSlot(item, defs) {
   const hashes = item.itemCategoryHashes;
-  const inventoryHash = get(item, 'inventory.bucketTypeHash');
+  const bucketHash = get(item, 'inventory.bucketTypeHash');
 
-  if (!inventoryHash) {
+  if (!bucketHash) {
     return null;
   }
 
-  return get(defs.bucket, `${inventoryHash}.displayProperties.name`);
-
-  // if (hashes.includes(KINETIC_WEAPON)) {
-  //   return get(defs.itemCategory[KINETIC_WEAPON], 'displayProperties.name');
-  // } else if (hashes.includes(ENERGY_WEAPON)) {
-  //   return get(defs.itemCategory[ENERGY_WEAPON], 'displayProperties.name');
-  // } else if (hashes.includes(POWER_WEAPON)) {
-  //   return get(defs.itemCategory[POWER_WEAPON], 'displayProperties.name');
-  // }
+  return get(defs.bucket, `${bucketHash}.displayProperties.name`);
 }
 
 function getDamageType(item, defs) {
@@ -62,39 +50,55 @@ function getDamageType(item, defs) {
 }
 
 const img = (src, className) =>
-  src ? `<img class="${className}" src="https://www.bungie.net${src}" />` : '';
+  src
+    ? `<a href="https://www.bungie.net${src}" target="_blank"><img class="${className}" src="https://www.bungie.net${src}" /></a>`
+    : '';
+
+const itemIconClassName = item => {
+  if (item.uiItemDisplayStyle === 'ui_display_style_engram') {
+    return 'itemImage_transparent';
+  }
+
+  return 'itemImage';
+};
 
 const icon = (item, className) =>
-  img(get(item, 'displayProperties.icon'), className || 'itemImage');
+  img(
+    get(item, 'displayProperties.icon'),
+    className || itemIconClassName(item),
+  );
 
-const table = (items, head, rowFn) => {
+const table = (tableName, items, head, rowFn, defs) => {
   return `
-    <table>
-      <thead>${head}</thead>
+    <table id="${tableName}">
+      <thead>
+        <tr class="titlerow">
+          <td><h2>${HEADINGS[tableName] || tableName}</h2></td>
+        </tr>
+        ${head}
+      </thead>
       <tbody>
-        ${items.map(item => rowFn(item)).join('')}
+        ${items.map(item => rowFn(item, defs)).join('')}
       </tbody>
     </table>
   `;
 };
 
-const classifiedOrWhatever = item => {
-  const name = get(item, 'displayProperties.name');
-  const icon = get(item, 'displayProperties.icon');
+const KINETIC_WEAPON = 1498876634;
+const ENERGY_WEAPON = 2465295065;
+const POWER_WEAPON = 953998645;
 
-  if (icon && name) {
-    return 0;
+const weaponSlotSorter = item => {
+  const bucketHash = get(item, 'inventory.bucketTypeHash');
+
+  switch (bucketHash) {
+    case KINETIC_WEAPON:
+      return 1;
+    case ENERGY_WEAPON:
+      return 2;
+    case POWER_WEAPON:
+      return 3;
   }
-
-  if (!icon && !name) {
-    return 10;
-  } else if (icon && !name) {
-    9;
-  } else if (!icon && name) {
-    8;
-  }
-
-  return 1;
 };
 
 const tierSortValue = item => {
@@ -113,18 +117,156 @@ const tierSortValue = item => {
   }
 };
 
-module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
-  const newWeapons = _(diffData.new)
-    .filter(item => hasCategoryHash(item, WEAPON))
-    .sortBy([tierSortValue]);
+const commonItemRows = item => `
+    <td><a href="https://data.destinysets.com/i/InventoryItem:${
+      item.hash
+    }" target="_blank">${item.hash}</a></td>
+    <td class="table-cell-image">${icon(item)}</td>
+    <td><a href="#${item.hash}">${get(
+  item,
+  'displayProperties.name',
+  '',
+)}</a></td>
+    <td class="preserveNewlines">${get(
+      item,
+      'displayProperties.description',
+      '',
+    )}</td>
+    <td class="nowrap">${get(item, 'itemTypeDisplayName', '')}</td>
+    <td class="nowrap">${get(item, 'inventory.tierTypeName', '')}</td>
+`;
 
-  const newArmour = _(diffData.new)
-    .filter(item => hasCategoryHash(item, ARMOR))
-    .sortBy([tierSortValue]);
+const categories = (item, defs) => {
+  return (item.itemCategoryHashes || [])
+    .map(hash => {
+      const category = defs.itemCategory[hash];
+      return category
+        ? `<span class="nowrap">${category.displayProperties.name}</span>`
+        : null;
+    })
+    .filter(Boolean)
+    .join(', ');
+};
+
+const tableRenders = {
+  misc: {
+    head: `
+      <tr>
+        <td>Hash</td>
+        <td class="table-cell-image">Icon</td>
+        <td>Name</td>
+        <td>Description</td>
+        <td>Type</td>
+        <td>Rarity</td>
+        <td>Categories</td>
+      </tr>`,
+
+    rows: (item, defs) => `
+      <tr>
+        ${commonItemRows(item)}
+        <td>${categories(item, defs)}</td>
+      </tr>
+    `,
+  },
+
+  weapons: {
+    head: `
+      <tr>
+        <td>Hash</td>
+        <td class="table-cell-image">Icon</td>
+        <td>Name</td>
+        <td>Description</td>
+        <td>Type</td>
+        <td>Rarity</td>
+        <td>Slot</td>
+        <td>Damage type</td>
+        <td>Categories</td>
+      </tr>`,
+
+    rows: (item, defs) => `
+      <tr id="${item.hash}">
+        ${commonItemRows(item)}
+        <td class="nowrap">${getWeaponSlot(item, defs)}</td>
+        <td class="nowrap">${getDamageType(item, defs)}</td>
+        <td>${categories(item, defs)}</td>
+      </tr>`,
+  },
+};
+
+const HEADINGS = {
+  weapons: 'Weapons',
+  armor: 'Armor',
+  emotes: 'Emotes',
+  emblem: 'Emblems',
+  everythingElse: 'Everything else',
+};
+
+function valueForTableName(tableName) {
+  switch (tableName) {
+    case 'weapons':
+      return 1;
+    case 'armor':
+      return 2;
+    case 'emotes':
+      return 3;
+    case 'everythingElse':
+      return 1000000;
+  }
+
+  return 100;
+}
+
+function renderMultipleTables(obj, defs) {
+  return _(obj)
+    .toPairs()
+    .sortBy(([tableName]) => valueForTableName(tableName))
+    .map(([tableName, items]) => {
+      const renderer = tableRenders[tableName] || tableRenders.misc;
+      return table(tableName, items, renderer.head, renderer.rows, defs);
+    })
+    .value()
+    .join('');
+}
+
+module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
+  const newItems = _(diffData.new)
+    .groupBy(item => {
+      if (hasCategoryHash(item, WEAPON)) {
+        return 'weapons';
+      } else if (hasCategoryHash(item, ARMOR)) {
+        return 'armor';
+      } else if (hasCategoryHash(item, 44)) {
+        return 'emotes';
+      } else if (hasCategoryHash(item, 19)) {
+        return 'emblem';
+      }
+
+      return 'everythingElse';
+    })
+    .value();
+
+  const sortBy = [tierSortValue, 'itemTypeDisplayName'];
+
+  newItems.weapons = _.sortBy(newItems.weapons, [
+    ...sortBy,
+    'itemTypeDisplayName',
+  ]);
+  newItems.armor = _.sortBy(newItems.armor, sortBy);
+  newItems.emotes = _.sortBy(newItems.emotes, sortBy);
+  newItems.everythingElse = _.sortBy(newItems.everythingElse, sortBy);
+
+  const headings = _(newItems)
+    .keys()
+    .sortBy(valueForTableName)
+    .value();
 
   return `
     <html>
       <head>
+        <meta charset="UTF-8">
+        <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.js"></script>
+        <script src="https://unpkg.com/sticky-table-headers"></script>
+
         <style>
           body {
             font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif
@@ -133,15 +275,23 @@ module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
           table {
             font-size: 14px;
             border-collapse: collapse;
+            margin: 20px 0;
           }
 
           thead {
             font-weight: bold;
             white-space: nowrap;
+            background: white;
+          }
+
+          .itemImage_transparent,
+          .itemImage {
+            max-height: 45px;
+            max-width: 100px;
           }
 
           .itemImage {
-            max-height: 50px
+            background: #585858;
           }
 
           .inlineImage {
@@ -160,61 +310,53 @@ module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
           .nowrap {
             white-space: nowrap;
           }
+
+          .preserveNewlines {
+            white-space: pre-line;
+          }
+
+          nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+          }
+
+          nav ul li {
+            display: inline-block;
+            padding: 0 10px;
+          }
+
+          nav ul li + li {
+            border-left: 1px solid gainsboro;
+          }
+
+          .titlerow, .titlerow td {
+            padding: 0;
+            border: none;
+          }
+
+          .titlerow h2 {
+            margin: 10px 0;
+          }
         </style>
       </head>
 
       <body>
 
-        <h1>Weapons</h1>
-        ${table(
-          newWeapons,
-          `
-          <tr>
-            <td>Hash</td>
-            <td class="table-cell-image">Icon</td>
-            <td>Name</td>
-            <td>Description</td>
-            <td>Type</td>
-            <td>Rarity</td>
-            <td>Slot</td>
-            <td>Damage type</td>
-          </tr>
-        `,
-          item => `
-            <tr>
-              <td>${item.hash}</td>
-              <td class="table-cell-image">${icon(item)}</td>
-              <td>${get(item, 'displayProperties.name')}</td>
-              <td>${get(item, 'displayProperties.description')}</td>
-              <td class="nowrap">${get(item, 'itemTypeDisplayName')}</td>
-              <td class="nowrap">${get(item, 'inventory.tierTypeName')}</td>
-              <td class="nowrap">${getWeaponSlot(item, defs)}</td>
-              <td class="nowrap">${getDamageType(item, defs)}</td>
-            </tr>`,
-        )}
 
-        <h1>Armour</h1>
-        ${table(
-          newArmour,
-          `
-          <tr>
-            <td>Hash</td>
-            <td class="table-cell-image">Icon</td>
-            <td>Name</td>
-            <td>Description</td>
-            <td>Type</td>
-          </tr>
-        `,
-          item => `
-            <tr>
-              <td>${item.hash}</td>
-              <td class="table-cell-image">${icon(item)}</td>
-              <td>${get(item, 'displayProperties.name')}</td>
-              <td>${get(item, 'displayProperties.description')}</td>
-              <td class="nowrap">${get(item, 'itemTypeDisplayName')}</td>
-            </tr>
-        `,
-        )}
+        <nav>
+          <ul>
+            ${headings
+              .map(h => `<li><a href="#${h}">${HEADINGS[h] || h}</a></li>`)
+              .join('')}
+          </ul>
+        </nav>
+
+        ${renderMultipleTables(newItems, defs)}
+
+        <script>
+          $('table').stickyTableHeaders();
+        </script>
       </body>
     </html>
   `;

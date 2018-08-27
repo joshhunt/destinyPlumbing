@@ -50,9 +50,13 @@ function saveFileWorker(task, cb) {
   const id = path.join('.');
   console.log(id, 'uploading to', s3Key);
 
+  const contentType = s3Key.includes('.html')
+    ? 'text/html'
+    : 'application/json';
+
   const promises = [
-    uploadToS3(s3Key, fileBody, { ContentType: 'application/json' }),
-    uploadToS3(versionedS3Key, fileBody, { ContentType: 'application/json' }),
+    uploadToS3(s3Key, fileBody, { ContentType: contentType }),
+    uploadToS3(versionedS3Key, fileBody, { ContentType: contentType }),
     writeFile(filePath, fileBody),
     writeFile(versionedFilePath, fileBody),
   ];
