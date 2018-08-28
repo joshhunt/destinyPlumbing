@@ -127,45 +127,45 @@ const DEFINITIONS = [
   'DestinyActivityModeDefinition',
   'DestinyInventoryItemDefinition',
 
-  // 'DestinyAchievementDefinition',
-  // 'DestinyActivityGraphDefinition',
-  // 'DestinyActivityModifierDefinition',
-  // 'DestinyActivityTypeDefinition',
+  'DestinyAchievementDefinition',
+  'DestinyActivityGraphDefinition',
+  'DestinyActivityModifierDefinition',
+  'DestinyActivityTypeDefinition',
   // 'DestinyBondDefinition',
-  // 'DestinyChecklistDefinition',
-  // 'DestinyClassDefinition',
-  // 'DestinyDamageTypeDefinition',
-  // 'DestinyDestinationDefinition',
-  // 'DestinyEnemyRaceDefinition',
-  // 'DestinyEquipmentSlotDefinition',
-  // 'DestinyFactionDefinition',
-  // 'DestinyGenderDefinition',
-  // 'DestinyHistoricalStatsDefinition',
-  // 'DestinyInventoryBucketDefinition',
-  // 'DestinyItemCategoryDefinition',
-  // 'DestinyItemTierTypeDefinition',
-  // 'DestinyLocationDefinition',
-  // 'DestinyLoreDefinition',
-  // 'DestinyMaterialRequirementSetDefinition',
-  // 'DestinyMedalTierDefinition',
-  // 'DestinyMilestoneDefinition',
+  'DestinyChecklistDefinition',
+  'DestinyClassDefinition',
+  'DestinyDamageTypeDefinition',
+  'DestinyDestinationDefinition',
+  'DestinyEnemyRaceDefinition',
+  'DestinyEquipmentSlotDefinition',
+  'DestinyFactionDefinition',
+  'DestinyGenderDefinition',
+  'DestinyHistoricalStatsDefinition',
+  'DestinyInventoryBucketDefinition',
+  'DestinyItemCategoryDefinition',
+  'DestinyItemTierTypeDefinition',
+  'DestinyLocationDefinition',
+  'DestinyLoreDefinition',
+  'DestinyMaterialRequirementSetDefinition',
+  'DestinyMedalTierDefinition',
+  'DestinyMilestoneDefinition',
   'DestinyObjectiveDefinition',
   'DestinyPlaceDefinition',
   'DestinyPlugSetDefinition',
-  // 'DestinyProgressionDefinition',
-  // 'DestinyProgressionLevelRequirementDefinition',
-  // 'DestinyRaceDefinition',
-  // 'DestinyReportReasonCategoryDefinition',
-  // 'DestinySackRewardItemListDefinition',
-  // 'DestinySandboxPerkDefinition',
-  // 'DestinySocketCategoryDefinition',
-  // 'DestinySocketTypeDefinition',
-  // 'DestinyStatDefinition',
-  // 'DestinyStatGroupDefinition',
-  // 'DestinyTalentGridDefinition',
-  // 'DestinyUnlockDefinition',
-  // 'DestinyVendorDefinition',
-  // 'DestinyVendorGroupDefinition',
+  'DestinyProgressionDefinition',
+  'DestinyProgressionLevelRequirementDefinition',
+  'DestinyRaceDefinition',
+  'DestinyReportReasonCategoryDefinition',
+  'DestinySackRewardItemListDefinition',
+  'DestinySandboxPerkDefinition',
+  'DestinySocketCategoryDefinition',
+  'DestinySocketTypeDefinition',
+  'DestinyStatDefinition',
+  'DestinyStatGroupDefinition',
+  'DestinyTalentGridDefinition',
+  'DestinyUnlockDefinition',
+  'DestinyVendorDefinition',
+  'DestinyVendorGroupDefinition',
 ];
 
 function diffDefinition(pathPrefix, definitionName, lang, previousId, defs) {
@@ -187,15 +187,22 @@ module.exports = function createItemDumps(pathPrefix, lang) {
     openJSON(`${pathPrefix}/raw/DestinyItemCategoryDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyDamageTypeDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyInventoryBucketDefinition.json`),
-  ]).then(([previousId, itemCategory, damageType, bucket]) => {
-    return mapPromiseAll(DEFINITIONS, definitionName => {
-      return diffDefinition(pathPrefix, definitionName, lang, previousId, {
-        itemCategory,
-        damageType,
-        bucket,
+  ])
+    .then(([previousId, itemCategory, damageType, bucket]) => {
+      return mapPromiseAll(DEFINITIONS, definitionName => {
+        return diffDefinition(pathPrefix, definitionName, lang, previousId, {
+          itemCategory,
+          damageType,
+          bucket,
+        });
       });
+    })
+    .catch(err => {
+      console.error('Error in diff, but ignoring:');
+      console.error(err);
+
+      return Promise.resolve();
     });
-  });
 
   // const defName = 'DestinyInventoryItemDefinition';
 
