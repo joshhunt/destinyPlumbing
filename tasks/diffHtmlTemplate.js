@@ -231,7 +231,6 @@ const tableRenders = {
         <td>Slot</td>
         <td>Damage type</td>
         <td>Ammo type</td>
-        <td>Categories</td>
       </tr>`,
 
     rows: (item, defs, defName) => `
@@ -242,7 +241,6 @@ const tableRenders = {
         <td class="nowrap">${
           AMMO_TYPE[_.get(item, 'equippingBlock.ammoType', 4)]
         }</td>
-        <td>${categories(item, defs)}</td>
       </tr>`,
   },
 };
