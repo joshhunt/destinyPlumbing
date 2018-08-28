@@ -64,17 +64,44 @@ function createDiffs(defName, current, previous, lang, defs) {
     changed: templateDiffData.changed.map(item => item.hash),
   };
 
-  const htmlPage =
+  const newHtmlPage =
     templateDiffData.new.length > 0 &&
-    diffHtmlTemplate(defName, templateDiffData, {
-      ...defs,
-      itemDefs: current,
-    });
+    diffHtmlTemplate(
+      defName,
+      templateDiffData.new,
+      {
+        ...defs,
+        itemDefs: current,
+      },
+      'New data',
+    );
 
-  const saveHtmlPagePromise = htmlPage
-    ? fileManager.saveFile([lang, 'diff', defName, 'diff.html'], htmlPage, {
+  const newHtmlPagePromise = newHtmlPage
+    ? fileManager.saveFile([lang, 'diff', defName, 'diff.html'], newHtmlPage, {
         raw: true,
       })
+    : Promise.resolve();
+
+  const changedHtmlPage =
+    templateDiffData.new.length > 0 &&
+    diffHtmlTemplate(
+      defName,
+      templateDiffData.changed,
+      {
+        ...defs,
+        itemDefs: current,
+      },
+      'Changed data',
+    );
+
+  const changedHtmlPagePromise = changedHtmlPage
+    ? fileManager.saveFile(
+        [lang, 'diff', defName, 'changed.html'],
+        changedHtmlPage,
+        {
+          raw: true,
+        },
+      )
     : Promise.resolve();
 
   return Promise.resolve([
@@ -83,7 +110,8 @@ function createDiffs(defName, current, previous, lang, defs) {
       friendlyDiff,
     ),
     // fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff),
-    saveHtmlPagePromise,
+    newHtmlPagePromise,
+    changedHtmlPagePromise,
   ]);
 }
 

@@ -288,10 +288,15 @@ const ITEM_CATEGORY_GROUPINGS = [
   [1742617626, 'armorOrnaments'],
 ];
 
-module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
+module.exports = function diffHtmlTemplate(
+  definitionName,
+  diffData,
+  defs,
+  title,
+) {
   const sortBy = [tierSortValue, 'itemTypeDisplayName'];
 
-  const newItems = _(diffData.new)
+  const newItems = _(diffData)
     .groupBy(item => {
       if (definitionName === 'DestinyObjectiveDefinition') {
         return 'objectives';
@@ -404,6 +409,8 @@ module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
       </head>
 
       <body>
+
+        <h1>${title}</h1>
 
         ${
           headings.length > 1
