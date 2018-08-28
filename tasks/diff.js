@@ -123,8 +123,8 @@ function getPreviousId() {
 }
 
 const DEFINITIONS = [
-  // 'DestinyActivityDefinition',
-  // 'DestinyActivityModeDefinition',
+  'DestinyActivityDefinition',
+  'DestinyActivityModeDefinition',
   'DestinyInventoryItemDefinition',
 
   // 'DestinyAchievementDefinition',
@@ -149,9 +149,9 @@ const DEFINITIONS = [
   // 'DestinyMaterialRequirementSetDefinition',
   // 'DestinyMedalTierDefinition',
   // 'DestinyMilestoneDefinition',
-  // 'DestinyObjectiveDefinition',
-  // 'DestinyPlaceDefinition',
-  // 'DestinyPlugSetDefinition',
+  'DestinyObjectiveDefinition',
+  'DestinyPlaceDefinition',
+  'DestinyPlugSetDefinition',
   // 'DestinyProgressionDefinition',
   // 'DestinyProgressionLevelRequirementDefinition',
   // 'DestinyRaceDefinition',

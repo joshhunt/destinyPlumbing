@@ -40,7 +40,7 @@ function getDamageType(item, defs) {
 
       if (!def) return null;
 
-      const name = get(def, 'displayProperties.name');
+      const name = getName(def);
       const iconHtml = icon(def, 'inlineImage');
 
       return [iconHtml, name].filter(Boolean).join(' ');
@@ -68,7 +68,11 @@ const icon = (item, className) =>
     className || itemIconClassName(item),
   );
 
-const table = (tableName, items, head, rowFn, defs) => {
+const getName = item => {
+  return get(item, 'displayProperties.name') || item.progressDescription || '';
+};
+
+const table = (tableName, items, head, rowFn, defs, definitionName) => {
   return `
     <table id="${tableName}">
       <thead>
@@ -78,7 +82,7 @@ const table = (tableName, items, head, rowFn, defs) => {
         ${head}
       </thead>
       <tbody>
-        ${items.map(item => rowFn(item, defs)).join('')}
+        ${items.map(item => rowFn(item, defs, definitionName)).join('')}
       </tbody>
     </table>
   `;
@@ -117,16 +121,17 @@ const tierSortValue = item => {
   }
 };
 
-const commonItemRows = item => `
-    <td><a href="https://data.destinysets.com/i/InventoryItem:${
-      item.hash
-    }" target="_blank">${item.hash}</a></td>
+const shortDefName = definitionName => {
+  const match = definitionName.match(/Destiny(\w+)Definition/);
+  return match ? match[1] : definitionName;
+};
+
+const commonItemRows = (item, definitionName) => `
+    <td><a href="https://data.destinysets.com/i/${shortDefName(
+      definitionName,
+    )}:${item.hash}" target="_blank">${item.hash}</a></td>
     <td class="table-cell-image">${icon(item)}</td>
-    <td><a href="#${item.hash}">${get(
-  item,
-  'displayProperties.name',
-  '',
-)}</a></td>
+    <td><a href="#${item.hash}">${getName(item)}</a></td>
     <td class="preserveNewlines">${get(
       item,
       'displayProperties.description',
@@ -141,7 +146,7 @@ const categories = (item, defs) => {
     .map(hash => {
       const category = defs.itemCategory[hash];
       return category
-        ? `<span class="nowrap">${category.displayProperties.name}</span>`
+        ? `<span class="nowrap">${getName(category)}</span>`
         : null;
     })
     .filter(Boolean)
@@ -161,9 +166,9 @@ const tableRenders = {
         <td>Categories</td>
       </tr>`,
 
-    rows: (item, defs) => `
+    rows: (item, defs, defName) => `
       <tr>
-        ${commonItemRows(item)}
+        ${commonItemRows(item, defName)}
         <td>${categories(item, defs)}</td>
       </tr>
     `,
@@ -193,14 +198,6 @@ const tableRenders = {
   },
 };
 
-const HEADINGS = {
-  weapons: 'Weapons',
-  armor: 'Armor',
-  emotes: 'Emotes',
-  emblem: 'Emblems',
-  everythingElse: 'Everything else',
-};
-
 function valueForTableName(tableName) {
   switch (tableName) {
     case 'weapons':
@@ -216,47 +213,83 @@ function valueForTableName(tableName) {
   return 100;
 }
 
-function renderMultipleTables(obj, defs) {
+function renderMultipleTables(obj, defs, definitionName) {
   return _(obj)
     .toPairs()
     .sortBy(([tableName]) => valueForTableName(tableName))
     .map(([tableName, items]) => {
+      if (!items || items.length === 0) {
+        return null;
+      }
+
       const renderer = tableRenders[tableName] || tableRenders.misc;
-      return table(tableName, items, renderer.head, renderer.rows, defs);
+      return table(
+        tableName,
+        items,
+        renderer.head,
+        renderer.rows,
+        defs,
+        definitionName,
+      );
     })
+    .filter(Boolean)
     .value()
     .join('');
 }
 
+const HEADINGS = {
+  weapons: 'Weapons',
+  armor: 'Armor',
+  ghosts: 'Ghosts',
+  emotes: 'Emotes',
+  emblem: 'Emblems',
+  ships: 'Ships',
+  sparrows: 'Sparrows',
+  objectives: 'Objectives',
+  everythingElse: 'Everything else',
+  weaponOrnaments: 'Weapon ornaments',
+  armorOrnaments: 'Armor ornaments',
+};
+
+const ITEM_CATEGORY_GROUPINGS = [
+  [WEAPON, 'weapons'],
+  [ARMOR, 'armor'],
+  [39, 'ghosts'],
+  [44, 'emotes'],
+  [19, 'emblem'],
+  [42, 'ships'],
+  [43, 'sparrows'],
+  [3124752623, 'weaponOrnaments'],
+  [1742617626, 'armorOrnaments'],
+];
+
 module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
+  const sortBy = [tierSortValue, 'itemTypeDisplayName'];
+
   const newItems = _(diffData.new)
     .groupBy(item => {
-      if (hasCategoryHash(item, WEAPON)) {
-        return 'weapons';
-      } else if (hasCategoryHash(item, ARMOR)) {
-        return 'armor';
-      } else if (hasCategoryHash(item, 44)) {
-        return 'emotes';
-      } else if (hasCategoryHash(item, 19)) {
-        return 'emblem';
+      if (definitionName === 'DestinyObjectiveDefinition') {
+        return 'objectives';
       }
 
-      return 'everythingElse';
-    })
-    .value();
+      const found = ITEM_CATEGORY_GROUPINGS.find(([categoryHash]) => {
+        return hasCategoryHash(item, categoryHash);
+      }) || [0, 'everythingElse'];
 
-  const sortBy = [tierSortValue, 'itemTypeDisplayName'];
+      return found[1];
+    })
+    .mapValues(items => _.sortBy(items, sortBy))
+    .value();
 
   newItems.weapons = _.sortBy(newItems.weapons, [
     ...sortBy,
     'itemTypeDisplayName',
   ]);
-  newItems.armor = _.sortBy(newItems.armor, sortBy);
-  newItems.emotes = _.sortBy(newItems.emotes, sortBy);
-  newItems.everythingElse = _.sortBy(newItems.everythingElse, sortBy);
 
   const headings = _(newItems)
-    .keys()
+    .toPairs()
+    .filter(([key, items]) => items.length > 0)
+    .map(([key, items]) => key)
     .sortBy(valueForTableName)
     .value();
 
@@ -338,21 +371,30 @@ module.exports = function diffHtmlTemplate(definitionName, diffData, defs) {
           .titlerow h2 {
             margin: 10px 0;
           }
+
+          a[href*="#"] {
+            color: inherit
+          }
         </style>
       </head>
 
       <body>
 
+        ${
+          headings.length > 1
+            ? `
+          <nav>
+            <ul>
+              ${headings
+                .map(h => `<li><a href="#${h}">${HEADINGS[h] || h}</a></li>`)
+                .join('')}
+            </ul>
+          </nav>
+        `
+            : ''
+        }
 
-        <nav>
-          <ul>
-            ${headings
-              .map(h => `<li><a href="#${h}">${HEADINGS[h] || h}</a></li>`)
-              .join('')}
-          </ul>
-        </nav>
-
-        ${renderMultipleTables(newItems, defs)}
+        ${renderMultipleTables(newItems, defs, definitionName)}
 
         <script>
           $('table').stickyTableHeaders();
