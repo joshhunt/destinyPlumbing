@@ -64,10 +64,18 @@ function createDiffs(defName, current, previous, lang, defs) {
     changed: templateDiffData.changed.map(item => item.hash),
   };
 
-  const htmlPage = diffHtmlTemplate(defName, templateDiffData, {
-    ...defs,
-    itemDefs: current,
-  });
+  const htmlPage =
+    templateDiffData.new.length > 0 &&
+    diffHtmlTemplate(defName, templateDiffData, {
+      ...defs,
+      itemDefs: current,
+    });
+
+  const saveHtmlPagePromise = htmlPage
+    ? fileManager.saveFile([lang, 'diff', defName, 'diff.html'], htmlPage, {
+        raw: true,
+      })
+    : Promise.resolve();
 
   return Promise.resolve([
     fileManager.saveFile(
@@ -75,9 +83,7 @@ function createDiffs(defName, current, previous, lang, defs) {
       friendlyDiff,
     ),
     // fileManager.saveFile([lang, 'diff', defName, 'deep.json'], bigDiff),
-    fileManager.saveFile([lang, 'diff', defName, 'diff.html'], htmlPage, {
-      raw: true,
-    }),
+    saveHtmlPagePromise,
   ]);
 }
 
@@ -172,9 +178,16 @@ function diffDefinition(pathPrefix, definitionName, lang, previousId, defs) {
   return Promise.all([
     openJSON(`${pathPrefix}/raw/${definitionName}.json`),
     getPreviousDef(definitionName, lang, previousId),
-  ]).then(([current, previous]) => {
-    return createDiffs(definitionName, current, previous, lang, defs);
-  });
+  ])
+    .then(([current, previous]) => {
+      return createDiffs(definitionName, current, previous, lang, defs);
+    })
+    .catch(err => {
+      console.error('Error in diff, but ignoring:');
+      console.error(err);
+
+      return Promise.resolve();
+    });
 }
 
 module.exports = function createItemDumps(pathPrefix, lang) {
@@ -187,22 +200,15 @@ module.exports = function createItemDumps(pathPrefix, lang) {
     openJSON(`${pathPrefix}/raw/DestinyItemCategoryDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyDamageTypeDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyInventoryBucketDefinition.json`),
-  ])
-    .then(([previousId, itemCategory, damageType, bucket]) => {
-      return mapPromiseAll(DEFINITIONS, definitionName => {
-        return diffDefinition(pathPrefix, definitionName, lang, previousId, {
-          itemCategory,
-          damageType,
-          bucket,
-        });
+  ]).then(([previousId, itemCategory, damageType, bucket]) => {
+    return mapPromiseAll(DEFINITIONS, definitionName => {
+      return diffDefinition(pathPrefix, definitionName, lang, previousId, {
+        itemCategory,
+        damageType,
+        bucket,
       });
-    })
-    .catch(err => {
-      console.error('Error in diff, but ignoring:');
-      console.error(err);
-
-      return Promise.resolve();
     });
+  });
 
   // const defName = 'DestinyInventoryItemDefinition';
 

@@ -69,7 +69,18 @@ const icon = (item, className) =>
   );
 
 const getName = item => {
-  return get(item, 'displayProperties.name') || item.progressDescription || '';
+  return (
+    get(item, 'displayProperties.name') ||
+    item.progressDescription ||
+    item.statName ||
+    ''
+  );
+};
+
+const getDescription = item => {
+  return (
+    get(item, 'displayProperties.description') || item.statDescription || ''
+  );
 };
 
 const table = (tableName, items, head, rowFn, defs, definitionName) => {
@@ -129,14 +140,10 @@ const shortDefName = definitionName => {
 const commonItemRows = (item, definitionName) => `
     <td><a href="https://data.destinysets.com/i/${shortDefName(
       definitionName,
-    )}:${item.hash}" target="_blank">${item.hash}</a></td>
+    )}:${item.hash}" target="_blank">${item.hash || item.statId}</a></td>
     <td class="table-cell-image">${icon(item)}</td>
     <td><a href="#${item.hash}">${getName(item)}</a></td>
-    <td class="preserveNewlines">${get(
-      item,
-      'displayProperties.description',
-      '',
-    )}</td>
+    <td class="preserveNewlines">${getDescription(item)}</td>
     <td class="nowrap">${get(item, 'itemTypeDisplayName', '')}</td>
     <td class="nowrap">${get(item, 'inventory.tierTypeName', '')}</td>
 `;
