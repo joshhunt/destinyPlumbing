@@ -74,6 +74,12 @@ function createDiffs(defName, current, previous, lang, defs) {
         itemDefs: current,
       },
       'New data',
+      [
+        templateDiffData.changed.length > 0 && {
+          text: 'Changed data',
+          link: 'changed.html',
+        },
+      ],
     );
 
   const newHtmlPagePromise = newHtmlPage
@@ -92,6 +98,12 @@ function createDiffs(defName, current, previous, lang, defs) {
         itemDefs: current,
       },
       'Changed data',
+      [
+        templateDiffData.new.length > 0 && {
+          text: 'New data',
+          link: 'diff.html',
+        },
+      ],
     );
 
   const changedHtmlPagePromise = changedHtmlPage

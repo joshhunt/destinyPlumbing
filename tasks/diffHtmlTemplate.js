@@ -293,8 +293,10 @@ module.exports = function diffHtmlTemplate(
   diffData,
   defs,
   title,
+  _extraLinks,
 ) {
   const sortBy = [tierSortValue, 'itemTypeDisplayName'];
+  const extraLinks = _extraLinks || [];
 
   const newItems = _(diffData)
     .groupBy(item => {
@@ -405,12 +407,33 @@ module.exports = function diffHtmlTemplate(
           a[href*="#"] {
             color: inherit
           }
+
+          .altlink {
+            display: inline-block;
+            margin-left: 1.5em;
+            font-size: 20px;
+          }
+
+          .altlink a {
+            color: #717171 !important;
+          }
         </style>
       </head>
 
       <body>
 
-        <h1>${title}</h1>
+        <h1>
+          ${title}
+
+          ${extraLinks
+            .map(
+              link =>
+                `<span class="altlink"><a href="${link.link}">${
+                  link.text
+                }</a></span>`,
+            )
+            .join('')}
+        </h1>
 
         ${
           headings.length > 1
