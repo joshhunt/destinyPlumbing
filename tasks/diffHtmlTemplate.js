@@ -162,6 +162,14 @@ const categories = (item, defs) => {
     .join(', ');
 };
 
+const AMMO_TYPE = {
+  0: 'None',
+  1: 'Primary',
+  2: 'Special',
+  3: 'Heavy',
+  4: 'Unknown',
+};
+
 const tableRenders = {
   misc: {
     head: `
@@ -194,6 +202,7 @@ const tableRenders = {
         <td>Rarity</td>
         <td>Slot</td>
         <td>Damage type</td>
+        <td>Ammo type</td>
         <td>Categories</td>
       </tr>`,
 
@@ -202,6 +211,9 @@ const tableRenders = {
         ${commonItemRows(item)}
         <td class="nowrap">${getWeaponSlot(item, defs)}</td>
         <td class="nowrap">${getDamageType(item, defs)}</td>
+        <td class="nowrap">${
+          AMMO_TYPE[_.get(item, 'equippingBlock.ammoType', 4)]
+        }</td>
         <td>${categories(item, defs)}</td>
       </tr>`,
   },
