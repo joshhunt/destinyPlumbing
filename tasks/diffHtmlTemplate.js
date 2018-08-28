@@ -77,10 +77,34 @@ const getName = item => {
   );
 };
 
-const getDescription = item => {
-  return (
-    get(item, 'displayProperties.description') || item.statDescription || ''
-  );
+const getDescription = (item, itemDefs) => {
+  // console.log(item.sockets);
+
+  const perkSocket = _.get(item, 'sockets.socketEntries', []).find(socket => {
+    // console.log(socket);
+    const plugDef = itemDefs.inventoryItem[socket.singleInitialItemHash];
+    if (_.get(plugDef, 'plug.plugCategoryIdentifier') === 'intrinsics') {
+      return true;
+    }
+  });
+
+  const perk =
+    perkSocket && itemDefs.inventoryItem[perkSocket.singleInitialItemHash];
+
+  const textDescription =
+    get(item, 'displayProperties.description') || item.statDescription || '';
+
+  return `
+    <span class="preserveNewlines">${textDescription}</span>
+    ${
+      perk
+        ? `<p class="perk">${icon(perk, 'perkImage')} <strong>${_.get(
+            perk,
+            'displayProperties.name',
+          )}</strong>: ${_.get(perk, 'displayProperties.description')}</p>`
+        : ''
+    }
+  `;
 };
 
 const table = (tableName, items, head, rowFn, defs, definitionName) => {
@@ -143,13 +167,13 @@ const shortDefName = definitionName => {
   return match ? match[1] : definitionName;
 };
 
-const commonItemRows = (item, definitionName) => `
+const commonItemRows = (item, defs, definitionName) => `
     <td><a href="https://data.destinysets.com/i/${shortDefName(
       definitionName,
     )}:${item.hash}" target="_blank">${item.hash || item.statId}</a></td>
     <td class="table-cell-image">${icon(item)}</td>
     <td><a href="#${item.hash}">${getName(item)}</a></td>
-    <td class="preserveNewlines">${getDescription(item)}</td>
+    <td>${getDescription(item, defs)}</td>
     <td class="nowrap">${get(item, 'itemTypeDisplayName', '')}</td>
     <td class="nowrap">${get(item, 'inventory.tierTypeName', '')}</td>
 `;
@@ -189,7 +213,7 @@ const tableRenders = {
 
     rows: (item, defs, defName) => `
       <tr>
-        ${commonItemRows(item, defName)}
+        ${commonItemRows(item, defs, defName)}
         <td>${categories(item, defs)}</td>
       </tr>
     `,
@@ -210,9 +234,9 @@ const tableRenders = {
         <td>Categories</td>
       </tr>`,
 
-    rows: (item, defs) => `
+    rows: (item, defs, defName) => `
       <tr id="${item.hash}">
-        ${commonItemRows(item)}
+        ${commonItemRows(item, defs, defName)}
         <td class="nowrap">${getWeaponSlot(item, defs)}</td>
         <td class="nowrap">${getDamageType(item, defs)}</td>
         <td class="nowrap">${
@@ -355,12 +379,29 @@ module.exports = function diffHtmlTemplate(
             max-width: 100px;
           }
 
+          strong {
+            font-weight: 600;
+          }
+
           .itemImage {
             background: #585858;
           }
 
           .inlineImage {
             max-height: 1em;
+          }
+
+          .perk {
+            font-style: italic;
+            font-size: .9em;
+          }
+
+          .perkImage {
+            max-height: 1.25em;
+            padding: 3px;
+            border-radius: 50%;
+            background: #80B2D4;
+            vertical-align: middle;
           }
 
           td {
