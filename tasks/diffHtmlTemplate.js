@@ -133,6 +133,10 @@ const tierSortValue = item => {
 };
 
 const shortDefName = definitionName => {
+  if (!definitionName) {
+    return 'InventoryItem';
+  }
+
   const match = (definitionName || 'DestinyInventoryItemDefinition').match(
     /Destiny(\w+)Definition/,
   );
