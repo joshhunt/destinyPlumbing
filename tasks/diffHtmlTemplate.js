@@ -133,7 +133,7 @@ const tierSortValue = item => {
 };
 
 const shortDefName = definitionName => {
-  const match = definitionName.match(/Destiny(\w+)Definition/);
+  const match = (definitionName || '').match(/Destiny(\w+)Definition/);
   return match ? match[1] : definitionName;
 };
 
