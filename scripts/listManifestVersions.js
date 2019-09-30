@@ -10,7 +10,9 @@ listS3('versions/', '/')
     console.log('');
     console.log('Keys from versions/', keys);
     return Promise.all(
-      keys.map(k => get(`https://destiny.plumbing/${k}index.json`)),
+      keys.map(k =>
+        get(`https://s3.amazonaws.com/destiny.plumbing/${k}index.json`),
+      ),
     );
   })
   .then(allIndexes => {

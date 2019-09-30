@@ -6,7 +6,7 @@ const { MANIFEST_URL, API_KEY } = require('./config.json');
 const get = (...args) => fetch(...args).then(r => r.json());
 
 const promise = Promise.all([
-  get('https://destiny.plumbing'),
+  get('https://s3.amazonaws.com/destiny.plumbing/index.json'),
   get(MANIFEST_URL, {
     headers: { 'X-API-Key': API_KEY },
   }),

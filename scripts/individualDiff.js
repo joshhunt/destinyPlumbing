@@ -14,7 +14,7 @@ const IGNORE_CHANGES = ['icon', 'screenshot'];
 const get = (...args) => fetch(...args).then(r => r.json());
 
 const defUrl = id =>
-  `https://destiny.plumbing/versions/${id}/${lang}/raw/${defName}.json`;
+  `https://s3.amazonaws.com/destiny.plumbing/versions/${id}/${lang}/raw/${defName}.json`;
 
 const diffChecker = (diffResult, key, valueA, valueB) => {
   if (key === 'index') {

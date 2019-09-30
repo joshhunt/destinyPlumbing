@@ -128,7 +128,7 @@ function createDiffs(defName, current, previous, lang, defs) {
 }
 
 function getPreviousDef(defName, lang, previousId) {
-  const itemsUrl = `https://destiny.plumbing/versions/${previousId}/${lang}/raw/${defName}.json`;
+  const itemsUrl = `https://s3.amazonaws.com/destiny.plumbing/versions/${previousId}/${lang}/raw/${defName}.json`;
   console.log(`Fetching previous def ${defName} for ID`, previousId);
   return axios.get(itemsUrl).then(r => r.data);
 }
@@ -144,7 +144,9 @@ function getPreviousId() {
         return !k.includes(global.HACKY_MANIFEST_ID);
       });
       return Promise.all(
-        keys.map(k => axios.get(`https://destiny.plumbing/${k}index.json`)),
+        keys.map(k =>
+          axios.get(`https://s3.amazonaws.com/destiny.plumbing/${k}index.json`),
+        ),
       );
     })
     .then(_allIndexes => {

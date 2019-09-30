@@ -2,7 +2,7 @@ require('isomorphic-fetch');
 const _ = require('lodash');
 
 const url =
-  'https://destiny.plumbing/en/raw/DestinyInventoryItemDefinition.json';
+  'https://s3.amazonaws.com/destiny.plumbing/en/raw/DestinyInventoryItemDefinition.json';
 
 const EMOTES = 44;
 const MODS = 59;
@@ -65,9 +65,7 @@ fetch(url)
         console.log(`${newEmote.hash}, // ${newEmote.displayProperties.name}`);
       } else {
         console.log(
-          `UNABLE TO FIND NEW ${oldEmote.displayProperties.name}: ${
-            oldEmote.hash
-          } =>`,
+          `UNABLE TO FIND NEW ${oldEmote.displayProperties.name}: ${oldEmote.hash} =>`,
         );
       }
     });

@@ -99,7 +99,7 @@ module.exports.collectManifest = function collectManifest() {
     path[path.length - 1] = fileName;
 
     const objectPath = path.join('.');
-    const url = `https://destiny.plumbing/${file.s3Key}`;
+    const url = `https://s3.amazonaws.com/destiny.plumbing/${file.s3Key}`;
     _.set(acc, objectPath, url);
 
     return acc;
