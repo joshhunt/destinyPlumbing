@@ -269,13 +269,13 @@ module.exports = function createItemDumps(pathPrefix, lang) {
         .then(([previousId, currentCollectibles, previousCollectibles]) => {
           const currentSourceStrings = _(currentCollectibles)
             .map(c => c.sourceString)
-            .isArrayfilter(Boolean)
+            .filter(Boolean)
             .uniq()
             .value();
 
           const previousSourceStrings = _(previousCollectibles)
             .map(c => c.sourceString)
-            .isArrayfilter(Boolean)
+            .filter(Boolean)
             .uniq()
             .value();
 
