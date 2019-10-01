@@ -243,23 +243,50 @@ module.exports = function createItemDumps(pathPrefix, lang) {
     openJSON(`${pathPrefix}/raw/DestinyDamageTypeDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyInventoryBucketDefinition.json`),
     openJSON(`${pathPrefix}/raw/DestinyInventoryItemDefinition.json`),
-  ]).then(([previousId, itemCategory, damageType, bucket, inventoryItem]) => {
-    return mapPromiseAll(DEFINITIONS, definitionName => {
-      return diffDefinition(pathPrefix, definitionName, lang, previousId, {
-        itemCategory,
-        damageType,
-        bucket,
-        inventoryItem,
+  ])
+    .then(([previousId, itemCategory, damageType, bucket, inventoryItem]) => {
+      return mapPromiseAll(DEFINITIONS, definitionName => {
+        return diffDefinition(pathPrefix, definitionName, lang, previousId, {
+          itemCategory,
+          damageType,
+          bucket,
+          inventoryItem,
+        });
       });
+    })
+    .then(() => {
+      return Promise.all([
+        getPreviousId(),
+        openJSON(`${pathPrefix}/raw/DestinyCollectibleDefinition.json`),
+      ])
+        .then(([previousId, collectibles]) => {
+          return Promise.all([
+            previousId,
+            collectibles,
+            getPreviousDef('DestinyCollectibleDefinition', lang, previousId),
+          ]);
+        })
+        .then(([previousId, currentCollectibles, previousCollectibles]) => {
+          const currentSourceStrings = _(currentCollectibles)
+            .map(c => c.sourceString)
+            .isArrayfilter(Boolean)
+            .uniq()
+            .value();
+
+          const previousSourceStrings = _(previousCollectibles)
+            .map(c => c.sourceString)
+            .isArrayfilter(Boolean)
+            .uniq()
+            .value();
+
+          const newSourceStrings = currentSourceStrings.filter(sourceString => {
+            return !previousSourceStrings.includes(sourceString);
+          });
+
+          return fileManager.saveFile(
+            [lang, 'diff', 'collectibleSourceStrings.json'],
+            { new: newSourceStrings },
+          );
+        });
     });
-  });
-
-  // const defName = 'DestinyInventoryItemDefinition';
-
-  // return Promise.all([
-  //   openJSON(`${pathPrefix}/raw/${defName}.json`),
-  //   getPreviousItems(defName, lang),
-  // ]).then(([current, previous]) =>
-  //   createDiffs(defName, current, previous, lang),
-  // );
 };
