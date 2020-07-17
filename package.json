@@ -23,7 +23,7 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.5.0",
     "isomorphic-fetch": "^2.2.1",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.19",
     "mkdirp": "^0.5.1",
     "multimeter": "^0.1.1",
     "objectdiff": "^1.1.0",
