@@ -19,7 +19,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "aws-sdk": "^2.7.21",
-    "axios": "^0.15.3",
+    "axios": "^0.21.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.5.0",
     "isomorphic-fetch": "^2.2.1",
